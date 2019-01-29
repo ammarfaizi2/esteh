@@ -1,0 +1,7 @@
+*.o
+*.hk
+*.so
+*.tmp
+*.log
+*.swp
+*.lock
