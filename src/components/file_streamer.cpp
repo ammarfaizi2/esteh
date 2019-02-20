@@ -3,5 +3,10 @@
 
 file_streamer::file_streamer(char *filename) {
 	this->file = fopen(filename, "r");
-	free(filename);
+}
+
+void *file_streamer::read() {
+	void *buf = malloc(sizeof(char) * 1024);
+	fread(buf, 1, 1024, this->file);
+	return buf;
 }

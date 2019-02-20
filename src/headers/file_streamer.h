@@ -1,6 +1,6 @@
 
-#ifndef __FILE_STREAMER_H
-#define __FILE_STREAMER_H 1
+#ifndef __HAKO_FILE_STREAMER_H
+#define __HAKO_FILE_STREAMER_H
 
 #include <cstdio>
 #include <stdlib.h>
@@ -11,7 +11,7 @@ public:
 	file_streamer(char *);
 	~file_streamer();
 
-	char *read();
+	void *read();
 
 private:
 	FILE *file;
