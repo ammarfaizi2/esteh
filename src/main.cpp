@@ -7,6 +7,7 @@
  * Hako Virtual Machine.
  */
 
+#include <hako_debug.h>
 #include <hako/usage.hpp>
 #include <hako/hako_opt.hpp>
 #include <hako/argv_parser.hpp>
@@ -29,13 +30,13 @@ int main(int argc, char *argv[])
 	free(st);
 	st = nullptr;
 
-	// debug opts
-	#if 1
-		for (int i = 0; i < opt_count; ++i)
-		{
+	// Debug only.
+	#ifdef HKDBG
+		for (int i = 0; i < opt_count; ++i) {
 			printf("opt[%d]:\n", i);
-			printf("  need_param\t= %d\n", opts[i]->need_param);
+			printf("  opt_code\t= %d\n", opts[i]->opt_code);
 			printf("  opt_name\t= %s\n", opts[i]->opt_name);
+			printf("  need_param\t= %d\n", opts[i]->need_param);
 			printf("  param\t\t= %s\n", opts[i]->param);	
 		}
 		printf("\n");

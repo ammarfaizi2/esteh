@@ -1,7 +1,7 @@
 
+#include <hako_debug.h>
+#include <hako/error.hpp>
 #include <hako/argv_parser.hpp>
-
-#define A1_OPTIONS_C 1
 
 argv_parser::argv_parser() {
 
@@ -18,12 +18,18 @@ void argv_parser::a2_set(char *arg, int opt_code) {
 void argv_parser::a1_opts(int offset, hako_opt *opt, char *arg, int arglen) {
 	switch (*arg) {
 		case 'l':
-			#define _a0 "linter_only"
+			#ifdef HKDBG
+				opt->opt_name = (char*)malloc(sizeof("linter_only"));
+				sprintf(opt->opt_name, "linter_only");
+			#endif
+			opt->opt_code = OPT_LINTER_ONLY;
 			opt->need_param = 0;
-			opt->opt_name = (char*)malloc(sizeof(_a0));
-			sprintf(opt->opt_name, _a0);
 			opt->param = nullptr;
 			this->opt_count++;
+		break;
+
+		default:
+			hako_error("Unknown option \"-%c\" (offset %d)", *arg, offset);
 		break;
 	}
 }
