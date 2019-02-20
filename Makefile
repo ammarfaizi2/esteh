@@ -1,25 +1,28 @@
 
 COMPILER = g++
 LINKER = g++
+DEBUG_MODE = 1
 
-WD=$(shell pwd)
-TARGET_BIN = hako
-INC = -I${WD}/include
-SRC = ${WD}/src
+ROOT_DIR = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+TARGET_BIN = ${ROOT_DIR}/hako
+INC = -I${ROOT_DIR}/include
+SRC = ${ROOT_DIR}/src
 
-COMPILER_FLAGS = -Wall -c -std=c++11 ${INC} -fpic
-LINKER_FLAGS = 
+_COMPILER_FLAGS = -Wall -c -std=c++11 ${INC} -fpic
+LINKER_FLAGS = -Wall
 
-# Debug Mode
-COMPILER_FLAGS += -g -o
-
-# Release Mode
-#COMPILER_FLAGS += -O2 -o
+ifneq (${DEBUG_MODE},0)
+	COMPILER_FLAGS = ${_COMPILER_FLAGS} -ggdb -g3
+else
+	COMPILER_FLAGS = ${_COMPILER_FLAGS} -O2 -s
+endif
 
 RM = rm -vf
 CP = cp -vf
 LN = ln -vsf
 MKDIR = mkdir -vp
+
+STRIP = strip -s ${TARGET_BIN}
 
 SOURCES = $(shell find ${SRC} -name '*.cpp')
 OBJECTS = $(SOURCES:%.cpp=%.o)
@@ -30,7 +33,10 @@ ${TARGET_BIN}: ${OBJECTS}
 		${LINKER} ${LINKER_FLAGS} -o ${TARGET_BIN} ${OBJECTS}
 
 ${OBJECTS}:
-		${COMPILER} ${COMPILER_FLAGS} $@ ${@:%.o=%.cpp}
+		${COMPILER} ${COMPILER_FLAGS} ${@:%.o=%.cpp} -o $@
+
+strip:
+	${STRIP}
 
 clean:
 	${RM} ${OBJECTS} ${TARGET_BIN}
