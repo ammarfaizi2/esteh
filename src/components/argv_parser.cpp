@@ -4,68 +4,75 @@
 #define A1_OPTIONS_C 1
 
 argv_parser::argv_parser() {
-	this->a1_options_c = A1_OPTIONS_C;
-	this->a1_options = (struct a1_opt**)malloc(sizeof(struct a1_opt*) * A1_OPTIONS_C);
-	// this->a2_options_c = 0;
-	// this->a2_options = (**char)malloc(sizeof(char) * this->a2_options_c);
 
-	this->a1_set('l', OPT_LINTER_ONLY);
 }
 
 void argv_parser::a1_set(char arg, int opt_code) {
-	this->a1_options[this->a1_opt_offset] = (struct a1_opt*)malloc(sizeof(struct a1_opt*));
-	this->a1_options[this->a1_opt_offset]->code = arg;
-	this->a1_options[this->a1_opt_offset]->opt_code = opt_code;
-	this->a1_opt_offset++;
+
 }
 
 void argv_parser::a2_set(char *arg, int opt_code) {
 
 }
 
-void argv_parser::a1_opts(int offset, char *option, char *arg) {
+void argv_parser::a1_opts(int offset, hako_opt *opt, char *arg, int arglen) {
+	switch (*arg) {
+		case 'l':
+			#define _a0 "linter_only"
+			opt->need_param = 0;
+			opt->opt_name = (char*)malloc(sizeof(_a0));
+			sprintf(opt->opt_name, _a0);
+			opt->param = nullptr;
+			this->opt_count++;
+		break;
+	}
+}
+
+void argv_parser::a2_opts(int offset, hako_opt *opt, char *arg) {
 
 }
 
-void argv_parser::a2_opts(int offset, char *option, char *arg) {
-	sprintf(option, "%s", arg);
-}
+int argv_parser::run(int argc, char **argv, char **filename, hako_opt **opts) {
 
-void argv_parser::run(int argc, char ***argv, char **filename, char ***options) {
+	this->opt_ptr = opts;
+	this->argv_ptr = argv;
 
+	#define $opts opts[k]
+	#define $argv argv[i]
+
+	int got_filename = 0;
 	size_t l;
 
-	for (int k, i = 1; i < argc; ++i) {
+	for (int i = 1, k = 0, j = 0; i < argc; ++i) {
 
 		if (this->skip == 1) {
 			this->skip = 0;
 			continue;
 		}
 
-		k = i - 1;
-		l = strlen(argv[0][i]);
-		options[0][k] = (char*)malloc(sizeof(char) * l + 1);
-		
-		if (argv[0][i][0] == '-') {
+		l = strlen($argv);
+		$opts = (hako_opt *)malloc(sizeof(hako_opt));
 
-			if (l == 1) {
-				printf("Invalid option \"-\" (offset %d)!\n", i);
-				exit(1);
-			}
+		if (l == 0) continue;
 
-			if (l == 2) {
-				this->a1_opts(i, options[0][k], argv[0][i]);
-			}
-
-			if (argv[0][i][1] == '-') {
-				if (l == 2) {
-					printf("Invalid option \"--\" (offset %d)!\n", i);
-					exit(1);
-				}
-
-				this->a2_opts(i, options[0][k], argv[0][i]);
-			}
+		if (l == 1 && $argv[0] == '-') {
+			printf("Error: Invalid parameter \"-\" (offset %d)\n", i);
+			exit(1);
 		}
+
+		if (l == 2 && $argv[0] == '-') {
+			this->a1_opts(i, $opts, $argv+1, l - 1);
+			continue;
+		}
+
+		*filename = (char*)malloc(sizeof(char) * l);
+		memcpy(*filename, $argv, sizeof(char) * l);
+		got_filename = 1;
 	}
 
+	if (!got_filename) {
+		*filename = nullptr;
+	}
+
+	return this->opt_count;
 }

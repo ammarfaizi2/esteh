@@ -5,29 +5,25 @@
 #include <cstdio>
 #include <stdlib.h>
 #include <string.h>
-
-#define OPT_LINTER_ONLY 1
+#include <hako/hako_opt.hpp>
 
 class argv_parser
 {
 public:
 	argv_parser();
-	void run(int, char ***, char **, char ***);
+	int run(int, char **, char **, hako_opt **);
 
 private:
-	void a1_opts(int, char *, char *);
-	void a2_opts(int, char *, char *);
+	void a1_opts(int, hako_opt *, char *, int);
+	void a2_opts(int, hako_opt *, char *);
 
 	void a1_set(char, int);
 	void a2_set(char *, int);
 
 	int skip = 0;
-	int a1_options_c;
-	int a2_options_c;
-	int a1_opt_offset = 0;
-	int a2_opt_offset = 1;
-	struct a1_opt **a1_options;
-	struct a2_opt **a2_options;
+	int opt_count = 0;
+	char **argv_ptr;
+	hako_opt **opt_ptr;
 };
 
 #endif
