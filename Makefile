@@ -2,17 +2,23 @@
 COMPILER = g++
 LINKER = g++
 
-COMPILER_FLAGS = -Wall -c -g -std=c++11 -fpic -o
+TARGET_BIN = hako
+INCLUDE_DIR = include
+
+COMPILER_FLAGS = -Wall -c -std=c++11 -I ${INCLUDE_DIR} -fpic
 LINKER_FLAGS = 
 
-BIN = hako
+# Debug Mode
+COMPILER_FLAGS += -g -o
+
+# Release Mode
+#COMPILER_FLAGS += -O2 -o
 
 RM = rm -vf
 CP = cp -vf
 LN = ln -vsf
 MKDIR = mkdir -vp
 
-#SOURCES = $(wildcard src/*.cpp)
 SOURCES = $(shell find src/ -name '*.cpp')
 OBJECTS = $(SOURCES:%.cpp=%.o)
 
