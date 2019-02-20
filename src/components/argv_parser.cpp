@@ -49,7 +49,7 @@ int argv_parser::run(int argc, char **argv, char **filename, hako_opt **opts) {
 	int got_filename = 0;
 	size_t l;
 
-	for (int i = 1, k = 0, j = 0; i < argc; ++i) {
+	for (int i = 1, k = 0; i < argc; ++i) {
 
 		if (this->skip == 1) {
 			this->skip = 0;

@@ -8,7 +8,9 @@
  */
 
 #include <hako_debug.h>
+#include <hako/error.hpp>
 #include <hako/usage.hpp>
+#include <hako/hakovm.hpp>
 #include <hako/hako_opt.hpp>
 #include <hako/argv_parser.hpp>
 
@@ -32,6 +34,7 @@ int main(int argc, char *argv[])
 
 	// Debug only.
 	#ifdef HKDBG
+		printf("Debug Mode:\n\n");
 		for (int i = 0; i < opt_count; ++i) {
 			printf("opt[%d]:\n", i);
 			printf("  opt_code\t= %d\n", opts[i]->opt_code);
@@ -43,7 +46,11 @@ int main(int argc, char *argv[])
 
 		// print filename
 		printf("Filename: %s\n", filename);
-
-		printf("Ok\n");
+		printf("Running hako...\n\n");
 	#endif
+
+	hakovm *hako = new hakovm(filename, opt_count, opts);
+	hako->run();
+
+	return 0;
 }

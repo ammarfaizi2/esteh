@@ -1,10 +1,11 @@
 
-#ifndef HAKO_ARGV_PARSER_H
-#define HAKO_ARGV_PARSER_H
+#ifndef HAKO_ARGV_PARSER_HPP
+#define HAKO_ARGV_PARSER_HPP
 
 #include <cstdio>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <hako/hako_opt.hpp>
 
 class argv_parser

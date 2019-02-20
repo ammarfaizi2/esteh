@@ -1,10 +1,15 @@
 
-//
-// Debug only.
-//
-// 1 = On, 0 = Off
-#if 1
+#ifndef HAKO_DEBUG_H
+#define HAKO_DEBUG_H
 
-	#define HKDBG
+	//
+	// Debug only.
+	//
+	// 1 = On, 0 = Off
+	#if 1
+
+		#define HKDBG
+
+	#endif
 
 #endif
