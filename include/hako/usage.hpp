@@ -1,6 +1,6 @@
 
-#ifndef __HAKO_USAGE_H
-#define __HAKO_USAGE_H
+#ifndef HAKO_USAGE_H
+#define HAKO_USAGE_H
 
 #include <cstdio>
 #include <stdlib.h>

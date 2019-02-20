@@ -4,4 +4,8 @@
 *.tmp
 *.log
 *.swp
+*.swo
 *.lock
+/hako
+/.gdb_history
+/peda-session-hako.txt

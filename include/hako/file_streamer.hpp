@@ -1,6 +1,6 @@
 
-#ifndef __HAKO_FILE_STREAMER_H
-#define __HAKO_FILE_STREAMER_H
+#ifndef HAKO_FILE_STREAMER_H
+#define HAKO_FILE_STREAMER_H
 
 #include <cstdio>
 #include <stdlib.h>

@@ -20,8 +20,14 @@ int main(int argc, char *argv[])
 		exit(0);
 	}
 
+	printf("%s\n", argv[1]);
+
 	char **options = (char**)malloc(sizeof(char*) * (argc - 1));
 	char *filename;
 
-	argv_parser(argc, &argv, &filename, &options);
+	argv_parser *st = new argv_parser;
+	st->run(argc, &argv, &filename, &options);
+	free(st);
+	st = nullptr;
+	printf("Ok\n");
 }

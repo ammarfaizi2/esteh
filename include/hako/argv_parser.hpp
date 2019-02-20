@@ -1,34 +1,34 @@
 
-#ifndef __HAKO_ARGV_PARSER_H
-#define __HAKO_ARGV_PARSER_H
+#ifndef HAKO_ARGV_PARSER_H
+#define HAKO_ARGV_PARSER_H
 
-void argv_parser(
-	int argc,
-	char ***argv,
-	char **filename,
-	char ***options
-) {
+#include <cstdio>
+#include <stdlib.h>
+#include <string.h>
 
-	for (size_t l, int i = 1; i < argc; ++i) {
+#define OPT_LINTER_ONLY 1
 
-		l = strlen(*argv[i]);
-		*options[i] = (char*)malloc(sizeof(char) * l);
+class argv_parser
+{
+public:
+	argv_parser();
+	void run(int, char ***, char **, char ***);
 
-		if (*argv[i][0] == '-') {
+private:
+	void a1_opts(int, char *, char *);
+	void a2_opts(int, char *, char *);
 
-			if (l == 1) {
-				pritnf("Invalid option \"-\" (offset %d)!\n", i);
-				exit(1);
-			}
+	void a1_set(char, int);
+	void a2_set(char *, int);
 
-			if (*argv[i][1] == '-') {
-				if () {
-					
-				}
-			}
-		}
-	}
-
-}
+	int skip = 0;
+	int a1_options_c;
+	int a2_options_c;
+	int a1_opt_offset = 0;
+	int a2_opt_offset = 1;
+	struct a1_opt **a1_options;
+	struct a2_opt **a2_options;
+};
 
 #endif
+
