@@ -1,6 +1,7 @@
 
 #include <hako_debug.h>
 #include <hako/error.hpp>
+#include <hako/hako_opt.hpp>
 #include <hako/argv_parser.hpp>
 
 argv_parser::argv_parser() {
