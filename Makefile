@@ -2,10 +2,12 @@
 COMPILER = g++
 LINKER = g++
 
+WD=$(shell pwd)
 TARGET_BIN = hako
-INCLUDE_DIR = include
+INC = -I${WD}/include
+SRC = ${WD}/src
 
-COMPILER_FLAGS = -Wall -c -std=c++11 -I ${INCLUDE_DIR} -fpic
+COMPILER_FLAGS = -Wall -c -std=c++11 ${INC} -fpic
 LINKER_FLAGS = 
 
 # Debug Mode
@@ -19,16 +21,16 @@ CP = cp -vf
 LN = ln -vsf
 MKDIR = mkdir -vp
 
-SOURCES = $(shell find src/ -name '*.cpp')
+SOURCES = $(shell find ${SRC} -name '*.cpp')
 OBJECTS = $(SOURCES:%.cpp=%.o)
 
-all: ${OBJECTS} ${BIN}
+all: ${OBJECTS} ${TARGET_BIN}
 
-${BIN}: ${OBJECTS}
-		${LINKER} ${LINKER_FLAGS} -o ${BIN} ${OBJECTS}
+${TARGET_BIN}: ${OBJECTS}
+		${LINKER} ${LINKER_FLAGS} -o ${TARGET_BIN} ${OBJECTS}
 
 ${OBJECTS}:
 		${COMPILER} ${COMPILER_FLAGS} $@ ${@:%.o=%.cpp}
 
 clean:
-	${RM} ${OBJECTS} ${BIN}
+	${RM} ${OBJECTS} ${TARGET_BIN}

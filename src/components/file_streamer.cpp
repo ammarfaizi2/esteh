@@ -1,5 +1,5 @@
 
-#include "headers/file_streamer.h"
+#include <hako/file_streamer.hpp>
 
 file_streamer::file_streamer(char *filename) {
 	this->file = fopen(filename, "r");
