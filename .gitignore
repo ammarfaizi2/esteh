@@ -9,3 +9,4 @@
 /hako
 /.gdb_history
 /peda-session-hako.txt
+!/test.hk
