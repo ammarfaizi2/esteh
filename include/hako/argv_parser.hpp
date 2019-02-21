@@ -18,9 +18,7 @@ private:
 	void a1_opts(int, hako_opt *, char *, int);
 	void a2_opts(int, hako_opt *, char *);
 
-	void a1_set(char, int);
-	void a2_set(char *, int);
-
+	int argc;
 	int skip = 0;
 	int opt_count = 0;
 	char **argv_ptr;

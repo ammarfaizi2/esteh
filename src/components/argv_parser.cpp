@@ -8,15 +8,11 @@ argv_parser::argv_parser() {
 
 }
 
-void argv_parser::a1_set(char arg, int opt_code) {
-
-}
-
-void argv_parser::a2_set(char *arg, int opt_code) {
-
-}
-
 void argv_parser::a1_opts(int offset, hako_opt *opt, char *arg, int arglen) {
+
+	opt->param = nullptr;
+	this->opt_count++;
+
 	switch (*arg) {
 		case 'l':
 			#ifdef HKDBG
@@ -25,13 +21,33 @@ void argv_parser::a1_opts(int offset, hako_opt *opt, char *arg, int arglen) {
 			#endif
 			opt->opt_code = OPT_LINTER_ONLY;
 			opt->need_param = 0;
-			opt->param = nullptr;
-			this->opt_count++;
 		break;
 
 		default:
 			hako_error("Unknown option \"-%c\" (offset %d)", *arg, offset);
 		break;
+	}
+
+	if (opt->need_param == 1) {
+		if (arglen > 1) {
+			opt->param = (char*)malloc(sizeof(char) * arglen);
+			memcpy(opt->param, arg+1, sizeof(char) * arglen);
+		} else if (offset >= (this->argc - 1)) {
+			hako_error("Option \"-%c\" needs a parameter! (offset %d)", *arg, offset);
+		}
+	} else {
+		if (arglen > 1) {
+			opt->param = (char*)malloc(sizeof(char) * arglen);
+			memcpy(opt->param, arg+1, sizeof(char) * arglen);
+			hako_error(
+				"\tOption \"-%c\" doesn't need any parameter. But, a parameter given. (offset %d)"\
+				"\n\tDetected parameter: \"-%c\" \"%s\"",
+				*arg,
+				offset,
+				*arg,
+				opt->param
+			);
+		}
 	}
 }
 
@@ -41,8 +57,9 @@ void argv_parser::a2_opts(int offset, hako_opt *opt, char *arg) {
 
 int argv_parser::run(int argc, char **argv, char **filename, hako_opt **opts) {
 
-	this->opt_ptr = opts;
+	this->argc = argc;
 	this->argv_ptr = argv;
+	this->opt_ptr = opts;
 
 	#define $opts opts[k]
 	#define $argv argv[i]
@@ -67,7 +84,7 @@ int argv_parser::run(int argc, char **argv, char **filename, hako_opt **opts) {
 			exit(1);
 		}
 
-		if (l == 2 && $argv[0] == '-') {
+		if (l >= 2 && $argv[0] == '-') {
 			this->a1_opts(i, $opts, $argv+1, l - 1);
 			continue;
 		}
