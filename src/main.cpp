@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 
 	// Debug only.
 	#ifdef HKDBG
-		printf("Debug Mode:\n\n");
+		printf("Debug Mode: On\n\n");
 		for (int i = 0; i < opt_count; ++i) {
 			printf("opt[%d]:\n", i);
 			printf("  opt_code\t= %d\n", opts[i]->opt_code);

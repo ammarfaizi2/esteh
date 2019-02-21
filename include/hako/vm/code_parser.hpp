@@ -3,6 +3,7 @@
 #define HAKO_CODE_PARSER_HPP
 
 #include <string.h>
+#include <stdlib.h>
 
 class code_parser
 {
@@ -16,6 +17,7 @@ public:
 	size_t get_error_length();
 	char *get_error();
 private:
+	int token_d(char *);
 	char *buf_code;
 	size_t read_bytes;
 };
