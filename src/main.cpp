@@ -27,8 +27,8 @@ int main(int argc, char *argv[])
 	hako_opt **opts = (hako_opt**)malloc(sizeof(hako_opt *));
 	char *filename;
 
-	argv_parser *st = new argv_parser;
-	int opt_count = st->run(argc, argv, &filename, opts);
+	void *st = new argv_parser;
+	int opt_count = ((argv_parser *)st)->run(argc, argv, &filename, opts);
 	free(st);
 	st = nullptr;
 
@@ -49,9 +49,9 @@ int main(int argc, char *argv[])
 		printf("Running hako...\n\n");
 	#endif
 
-	hakovm *hako = new hakovm(filename, opt_count, opts);
-	hako->run();
-	free(hako); hako = nullptr;
+	st = new hakovm(filename, opt_count, opts);
+	((hakovm *)st)->run();
+	free(st); st = nullptr;
 	free(filename); filename = nullptr;
 	free(*opts); *opts = nullptr;
 	free(opts); opts = nullptr;
