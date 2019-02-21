@@ -52,7 +52,7 @@ void argv_parser::a1_opts(int offset, hako_opt *opt, char *arg, int arglen) {
 }
 
 void argv_parser::a2_opts(int offset, hako_opt *opt, char *arg) {
-
+	
 }
 
 int argv_parser::run(int argc, char **argv, char **filename, hako_opt **opts) {
@@ -61,13 +61,13 @@ int argv_parser::run(int argc, char **argv, char **filename, hako_opt **opts) {
 	this->argv_ptr = argv;
 	this->opt_ptr = opts;
 
-	#define $opts opts[k]
+	#define $opts opts[this->opt_count]
 	#define $argv argv[i]
 
 	int got_filename = 0;
 	size_t l;
 
-	for (int i = 1, k = 0; i < argc; ++i) {
+	for (int i = 1; i < argc; ++i) {
 
 		if (this->skip == 1) {
 			this->skip = 0;

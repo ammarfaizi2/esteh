@@ -1,6 +1,7 @@
 
 #ifndef HAKO_HAKO_OPT_HPP
 #define HAKO_HAKO_OPT_HPP
+
 #define OPT_LINTER_ONLY 1
 
 #include <hako_debug.h>

@@ -10,8 +10,8 @@
 #include <hako_debug.h>
 #include <hako/error.hpp>
 #include <hako/usage.hpp>
-#include <hako/hakovm.hpp>
 #include <hako/hako_opt.hpp>
+#include <hako/vm/hakovm.hpp>
 #include <hako/argv_parser.hpp>
 
 int main(int argc, char *argv[])
@@ -51,6 +51,16 @@ int main(int argc, char *argv[])
 
 	hakovm *hako = new hakovm(filename, opt_count, opts);
 	hako->run();
+	free(hako); hako = nullptr;
+	free(filename); filename = nullptr;
+	free(*opts); *opts = nullptr;
+	free(opts); opts = nullptr;
+
+	// Run hako shutdown.
+
+	// ...
+
+	// end hako shutdown.
 
 	return 0;
 }

@@ -1,9 +1,8 @@
 
 #include <hako/error.hpp>
-#include <hako/hakovm.hpp>
 #include <hako/hako_opt.hpp>
-
-#define HAKO_FILE_BUFFER 2048
+#include <hako/vm/hakovm.hpp>
+#include <hako/vm/code_parser.hpp>
 
 hakovm::hakovm(char *filename, int opt_count, hako_opt **opts) {
 	this->filename = filename;
@@ -12,10 +11,23 @@ hakovm::hakovm(char *filename, int opt_count, hako_opt **opts) {
 }
 
 void hakovm::run() {
+	for (int i = 0; i < this->opt_count; ++i) {
+		switch (this->opts[i]->opt_code) {
+			case OPT_LINTER_ONLY:
+				char *error = nullptr;
+				if (this->linter(&error)) {
+					printf("No syntax error detected in \"%s\"\n", this->filename);
+					exit(0);
+				} else {
+					hako_error(error);
+					exit(1);
+				}
+				return;
+			break;
+		}
+	}
 
-	this->init_file_streamer();
-	this->parse_file();
-
+	this->parse_file(0);
 }
 
 void hakovm::init_file_streamer() {
@@ -38,11 +50,41 @@ void hakovm::init_file_streamer() {
 		hako_error("Could not open input file: \"%s\"", this->filename);
 }
 
-void hakovm::parse_file() {
+int hakovm::linter(char **error) {
+	*error = (char*)malloc(sizeof(char));
+
+	this->parse_file(1);
+
+	if (this->error_parse == nullptr) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+void hakovm::parse_file(int linter_only) {
+	this->init_file_streamer();
+
+	code_parser *parser = new code_parser();
 	char *buf = (char*)malloc(sizeof(char) * (HAKO_FILE_BUFFER + 1));
 
+	size_t read_bytes;
+
 	while (!feof(this->hdf)) {
-		fread(buf, 1, HAKO_FILE_BUFFER, this->hdf);
-		printf("%s\n", buf);
+		read_bytes = fread(buf, 1, HAKO_FILE_BUFFER, this->hdf);
+		parser->buf_read(buf, read_bytes);
+		parser->build_opcode();
 	}
+
+	free(buf); buf = nullptr;
+
+	parser->finish();
+
+	if (!parser->is_ok()) {
+		memcpy(this->error_parse, parser->get_error(), parser->get_error_length());
+	}
+
+	free(parser);
+	parser = nullptr;
+
 }
