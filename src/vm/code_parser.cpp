@@ -41,84 +41,74 @@ int code_parser::token_d(char *token) {
 
 void code_parser::build_opcode() {
 
-	#define $rb this->buf_code[i]
+	#define $rb this->buf_code[i]	
 
-	hako_opcode **opcodes = (hako_opcode **)malloc(sizeof(hako_opcode *));
-	size_t opcodes_size = 0;
-
-	int 
-		in_quoto = 0,
-		token_d = 0,
+	int in_dquo = 0,
+		in_te = 0,
 		line = 1;
 
-	char *cur_token = (char *)malloc(sizeof(char));
-	size_t cur_token_size = 0;
+	hako_opcode ** opcodes = (hako_opcode **)malloc(sizeof(hako_opcode *));
+	size_t opcodes_size = 0;
+
+	char *token;
+
+	// Initialize token with 1 char allocation.
+	token = (char *)malloc(sizeof(char));
+
+	size_t token_size = 1;
 
 	for (size_t i = 0; i < this->read_bytes; ++i) {
-
+		
 		if ($rb == 10) {
 			line++;
 		}
+		
+		if ($rb == '"') {
 
-		if ($rb == 34) {
-			if (in_quoto) {
-				cur_token = (char*)realloc(cur_token, ++cur_token_size);
-				cur_token[cur_token_size - 1] = '\0';
-				
-				if (opcodes_size > 0) {
-					opcodes = (hako_opcode **)realloc(opcodes, sizeof(hako_opcode *) * opcodes_size);
-				}
+			if (in_dquo) {
+				// End of a string.
 
-				opcodes[opcodes_size] = (hako_opcode *)malloc(sizeof(hako_opcode));
-				opcodes[opcodes_size]->code = TE_STRING;
-				opcodes[opcodes_size]->line = line;
-				opcodes[opcodes_size]->content = (char *)malloc(sizeof(char) * cur_token_size);
-				memcpy(opcodes[opcodes_size++]->content, cur_token, sizeof(char) * cur_token_size);
-
-				in_quoto = 0;
 			} else {
-				in_quoto = 1;
+				// Start of a string.
 			}
 			continue;
-		} else {
-			if (in_quoto) {
-				cur_token = (char *)realloc(cur_token, cur_token_size + 1);
-				cur_token[cur_token_size++] = $rb;
-				continue;
-			}
+		} else if (in_dquo) {
+
+			continue;
 		}
+
 
 		if (
+			// A-Z
 			($rb >= 65 && $rb <= 90) ||
+
+			// a-z
 			($rb >= 97 && $rb <= 122) ||
+
+			// _
 			($rb == 95)
 		) {
-			if (token_d) {
-				cur_token = (char *)realloc(cur_token, cur_token_size);
+			if (in_te) {
+				if (token_size > 1) {
+					token = (char *)realloc(token, token_size);
+				}
 			} else {
-				token_d = 1;
+
+				// We don't need realloc here, because it has been allocated with 1 char.
+				in_te = 1;
 			}
-			cur_token[cur_token_size++] = $rb;
+			token[token_size - 1] = $rb;
+			token_size++;
 			continue;
-		}
-		
-		if (token_d) {
-			cur_token = (char*)realloc(cur_token, ++cur_token_size);
-			cur_token[cur_token_size - 1] = '\0';
-			
-			if (opcodes_size > 0) {
-				opcodes = (hako_opcode **)realloc(opcodes, sizeof(hako_opcode *) * opcodes_size);
+		} else {
+			if (in_te) {
+				in_te = 0;
 			}
-
-			opcodes[opcodes_size] = (hako_opcode *)malloc(sizeof(hako_opcode));
-			opcodes[opcodes_size]->code = this->token_d(cur_token);
-			opcodes[opcodes_size]->line = line;
-			opcodes[opcodes_size++]->content = nullptr;
-
-			token_d = 0;
-			cur_token_size = 0;
 		}
 	}
+
+	printf("%s\n", token);
+	exit(0);
 
 	int skip = 0;
 
