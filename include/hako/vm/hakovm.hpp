@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <hako/hako_opt.hpp>
 
-#define HAKO_FILE_BUFFER 31457280
+#define HAKO_FILE_BUFFER 2048
 
 class hakovm
 {

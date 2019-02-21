@@ -74,15 +74,15 @@ void hakovm::parse_file(int linter_only) {
 		read_bytes = fread(buf, 1, HAKO_FILE_BUFFER, this->hdf);
 		parser->buf_read(buf, read_bytes);
 		parser->build_opcode();
+		if (!parser->is_ok()) {
+			memcpy(this->error_parse, parser->get_error(), parser->get_error_length());
+			break;
+		}
 	}
 
 	free(buf); buf = nullptr;
 
 	parser->finish();
-
-	if (!parser->is_ok()) {
-		memcpy(this->error_parse, parser->get_error(), parser->get_error_length());
-	}
 
 	free(parser);
 	parser = nullptr;

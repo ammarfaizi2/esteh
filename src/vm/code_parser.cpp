@@ -33,15 +33,40 @@ int code_parser::token_d(char *token) {
 	if (!strcmp(token, "echo")) {
 		return TD_ECHO;
 	}
-
-
-	printf("Error: Unknown token \"%s\"\n", token);
 	return T_UNKNOWN;
 }
 
 void code_parser::build_opcode() {
 
-	#define $rb this->buf_code[i]	
+	#define $rb this->buf_code[i]
+	#define TOKEN_D_GET \
+		if (in_te) { \
+			opcodes = (hako_opcode **)realloc(opcodes, sizeof(hako_opcode *) * (opcodes_size + 1)); \
+			opcodes[opcodes_size] = (hako_opcode *)malloc(sizeof(hako_opcode)); \
+			opcodes[opcodes_size]->line = line; \
+			opcodes[opcodes_size]->code = this->token_d(token); \
+			if ((opcodes[opcodes_size]->code = this->token_d(token)) == T_UNKNOWN) { \
+				fprintf(stderr, "Syntax Error: Unknown token \"%s\" on line %d\n", token, line); \
+				exit(1); \
+			} \
+			opcodes[opcodes_size]->content = nullptr; \
+			opcodes_size++; \
+			in_te = 0; \
+			token_size = 0; \
+		}
+	#define TOKEN_END_STRING \
+		if (in_dquo) { \
+			/* End of a string. */ \
+			opcodes = (hako_opcode **)realloc(opcodes, sizeof(hako_opcode *) * (opcodes_size + 1)); \
+			opcodes[opcodes_size] = (hako_opcode *)malloc(sizeof(hako_opcode)); \
+			opcodes[opcodes_size]->line = line; \
+			opcodes[opcodes_size]->code = TE_STRING; \
+			opcodes[opcodes_size]->content = (char *)malloc(sizeof(char) * (token_size + 1)); \
+			memcpy(opcodes[opcodes_size]->content, token, sizeof(char) * (token_size + 1)); \
+			opcodes_size++; \
+			in_dquo = 0; \
+			token_size = 0; \
+		}
 
 	int in_dquo = 0,
 		in_te = 0,
@@ -56,25 +81,13 @@ void code_parser::build_opcode() {
 	token = (char *)malloc(sizeof(char));
 
 	size_t token_size = 0;
-
 	for (size_t i = 0; i < this->read_bytes; ++i) {
 		if ($rb == 10) {
 			line++;
 		}
 
 		if ($rb == '"') {
-			if (in_dquo) {
-				// End of a string.
-				opcodes = (hako_opcode **)realloc(opcodes, sizeof(hako_opcode *) * (opcodes_size + 1));
-				opcodes[opcodes_size] = (hako_opcode *)malloc(sizeof(hako_opcode));
-				opcodes[opcodes_size]->line = line;
-				opcodes[opcodes_size]->code = TE_STRING;
-				opcodes[opcodes_size]->content = (char *)malloc(sizeof(char) * (token_size + 1));
-				memcpy(opcodes[opcodes_size]->content, token, sizeof(char) * (token_size + 1));
-				opcodes_size++;
-				in_dquo = 0;
-				token_size = 0;
-			} else {
+			TOKEN_END_STRING else {
 				// Start of a string.
 				in_dquo = 1;
 			}
@@ -99,19 +112,15 @@ void code_parser::build_opcode() {
 			token[token_size] = $rb;
 			token[token_size + 1] = '\0';
 			token_size++;
-		} else if (in_te) {
-			opcodes = (hako_opcode **)realloc(opcodes, sizeof(hako_opcode *) * (opcodes_size + 1));
-			opcodes[opcodes_size] = (hako_opcode *)malloc(sizeof(hako_opcode));
-			opcodes[opcodes_size]->line = line;
-			opcodes[opcodes_size]->code = this->token_d(token);
-			opcodes[opcodes_size]->content = nullptr;
-			opcodes_size++;
-			in_te = 0;
-			token_size = 0;
-		}
+		} else TOKEN_D_GET
 	}
 
+	TOKEN_END_STRING
+	TOKEN_D_GET
+	
 	free(token);
+	token = nullptr;
+
 	int skip = 0;
 
 	for (size_t i = 0; i < opcodes_size; ++i) {
