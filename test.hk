@@ -1,6 +1,2 @@
-
 echo "Hello World";
-echo "test abc 123";
-
-
-
+echo "test 123";

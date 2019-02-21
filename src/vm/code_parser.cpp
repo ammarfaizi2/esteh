@@ -47,7 +47,7 @@ void code_parser::build_opcode() {
 		in_te = 0,
 		line = 1;
 
-	hako_opcode ** opcodes = (hako_opcode **)malloc(sizeof(hako_opcode *));
+	hako_opcode **opcodes = (hako_opcode **)malloc(sizeof(hako_opcode *));
 	size_t opcodes_size = 0;
 
 	char *token;
@@ -55,61 +55,63 @@ void code_parser::build_opcode() {
 	// Initialize token with 1 char allocation.
 	token = (char *)malloc(sizeof(char));
 
-	size_t token_size = 1;
+	size_t token_size = 0;
 
 	for (size_t i = 0; i < this->read_bytes; ++i) {
-		
 		if ($rb == 10) {
 			line++;
 		}
-		
-		if ($rb == '"') {
 
+		if ($rb == '"') {
 			if (in_dquo) {
 				// End of a string.
-
+				opcodes = (hako_opcode **)realloc(opcodes, sizeof(hako_opcode *) * (opcodes_size + 1));
+				opcodes[opcodes_size] = (hako_opcode *)malloc(sizeof(hako_opcode));
+				opcodes[opcodes_size]->line = line;
+				opcodes[opcodes_size]->code = TE_STRING;
+				opcodes[opcodes_size]->content = (char *)malloc(sizeof(char) * (token_size + 1));
+				memcpy(opcodes[opcodes_size]->content, token, sizeof(char) * (token_size + 1));
+				opcodes_size++;
+				in_dquo = 0;
+				token_size = 0;
 			} else {
 				// Start of a string.
+				in_dquo = 1;
 			}
 			continue;
 		} else if (in_dquo) {
-
+			token = (char *)realloc(token, token_size + 2);
+			token[token_size] = $rb;
+			token[token_size + 1] = '\0';
+			token_size++;
 			continue;
 		}
 
-
 		if (
-			// A-Z
 			($rb >= 65 && $rb <= 90) ||
-
-			// a-z
 			($rb >= 97 && $rb <= 122) ||
-
-			// _
 			($rb == 95)
 		) {
-			if (in_te) {
-				if (token_size > 1) {
-					token = (char *)realloc(token, token_size);
-				}
-			} else {
-
-				// We don't need realloc here, because it has been allocated with 1 char.
+			if (!in_te) {
 				in_te = 1;
 			}
-			token[token_size - 1] = $rb;
+			token = (char *)realloc(token, token_size + 2);
+			token[token_size] = $rb;
+			token[token_size + 1] = '\0';
 			token_size++;
-			continue;
-		} else {
-			if (in_te) {
-				in_te = 0;
-			}
+		} else if (in_te) {
+			opcodes = (hako_opcode **)realloc(opcodes, sizeof(hako_opcode *) * (opcodes_size + 1));
+			opcodes[opcodes_size] = (hako_opcode *)malloc(sizeof(hako_opcode));
+			opcodes[opcodes_size]->line = line;
+			opcodes[opcodes_size]->code = this->token_d(token);
+			opcodes[opcodes_size]->content = nullptr;
+			opcodes_size++;
+			in_te = 0;
+			token_size = 0;
 		}
 	}
 
-	printf("%s\n", token);
-	exit(0);
-
+	free(token);
 	int skip = 0;
 
 	for (size_t i = 0; i < opcodes_size; ++i) {
