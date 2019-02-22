@@ -1,12 +1,12 @@
 
-#ifndef HAKO_TOKEN_HPP
-#define HAKO_TOKEN_HPP
+#ifndef ESTEH_TOKEN_HPP
+#define ESTEH_TOKEN_HPP
 
-typedef struct _hako_opcode {
+typedef struct _esteh_opcode {
 	int code;
 	int line;
 	char *content;
-} hako_opcode;
+} esteh_opcode;
 
 #define T_UNKNOWN -1
 #define TD_ECHO 0xd001

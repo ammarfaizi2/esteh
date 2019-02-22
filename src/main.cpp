@@ -4,15 +4,15 @@
  * @licese MIT
  * @version 0.0.1
  *
- * Hako Virtual Machine.
+ * Esteh Virtual Machine.
  */
 
-#include <hako_debug.h>
-#include <hako/error.hpp>
-#include <hako/usage.hpp>
-#include <hako/hako_opt.hpp>
-#include <hako/vm/hakovm.hpp>
-#include <hako/argv_parser.hpp>
+#include <esteh_debug.h>
+#include <esteh/error.hpp>
+#include <esteh/usage.hpp>
+#include <esteh/esteh_opt.hpp>
+#include <esteh/vm/estehvm.hpp>
+#include <esteh/argv_parser.hpp>
 
 int main(int argc, char *argv[])
 {
@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 		exit(0);
 	}
 
-	hako_opt **opts = (hako_opt**)malloc(sizeof(hako_opt *));
+	esteh_opt **opts = (esteh_opt**)malloc(sizeof(esteh_opt *));
 	char *filename;
 
 	void *st = new argv_parser;
@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
 	st = nullptr;
 
 	// Debug only.
-	#ifdef HKDBG
+	#ifdef ESTEH_DEBUG
 		printf("Debug Mode: On\n\n");
 		for (int i = 0; i < opt_count; ++i) {
 			printf("opt[%d]:\n", i);
@@ -46,21 +46,21 @@ int main(int argc, char *argv[])
 
 		// print filename
 		printf("Filename: %s\n", filename);
-		printf("Running hako...\n\n");
+		printf("Running esteh...\n\n");
 	#endif
 
-	st = new hakovm(filename, opt_count, opts);
-	((hakovm *)st)->run();
+	st = new estehvm(filename, opt_count, opts);
+	((estehvm *)st)->run();
 	free(st); st = nullptr;
 	free(filename); filename = nullptr;
 	free(*opts); *opts = nullptr;
 	free(opts); opts = nullptr;
 
-	// Run hako shutdown.
+	// Run esteh shutdown.
 
 	// ...
 
-	// end hako shutdown.
+	// end esteh shutdown.
 
 	return 0;
 }

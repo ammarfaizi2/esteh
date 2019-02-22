@@ -1,17 +1,15 @@
 
-#ifndef HAKO_HAKOVM_HPP
-#define HAKO_HAKOVM_HPP
+#ifndef ESTEH_ESTEHVM_HPP
+#define ESTEH_ESTEHVM_HPP
 
 #include <cstdio>
 #include <unistd.h>
-#include <hako/hako_opt.hpp>
+#include <esteh/esteh_opt.hpp>
 
-#define HAKO_FILE_BUFFER 2048
-
-class hakovm
+class estehvm
 {
 public:
-	hakovm(char *, int, hako_opt **ss);
+	estehvm(char *, int, esteh_opt **ss);
 	void run();
 	void init_file_streamer();
 	void parse_file(int);
@@ -20,7 +18,7 @@ private:
 	int opt_count;
 	char *filename;
 	char *error_parse = nullptr;
-	hako_opt **opts;
+	esteh_opt **opts;
 	FILE *hdf;
 };
 

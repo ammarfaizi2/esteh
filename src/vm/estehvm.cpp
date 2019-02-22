@@ -1,16 +1,16 @@
 
-#include <hako/error.hpp>
-#include <hako/hako_opt.hpp>
-#include <hako/vm/hakovm.hpp>
-#include <hako/vm/code_parser.hpp>
+#include <esteh/error.hpp>
+#include <esteh/esteh_opt.hpp>
+#include <esteh/vm/estehvm.hpp>
+#include <esteh/vm/code_parser.hpp>
 
-hakovm::hakovm(char *filename, int opt_count, hako_opt **opts) {
+estehvm::estehvm(char *filename, int opt_count, esteh_opt **opts) {
 	this->filename = filename;
 	this->opt_count = opt_count;
 	this->opts = opts;
 }
 
-void hakovm::run() {
+void estehvm::run() {
 	for (int i = 0; i < this->opt_count; ++i) {
 		switch (this->opts[i]->opt_code) {
 			case OPT_LINTER_ONLY:
@@ -19,7 +19,7 @@ void hakovm::run() {
 					printf("No syntax error detected in \"%s\"\n", this->filename);
 					exit(0);
 				} else {
-					hako_error(error);
+					esteh_error(error);
 					exit(1);
 				}
 				return;
@@ -30,7 +30,7 @@ void hakovm::run() {
 	this->parse_file(0);
 }
 
-void hakovm::init_file_streamer() {
+void estehvm::init_file_streamer() {
 
 	// Make sure that the file exists and readable.
 	if(!(access(this->filename, F_OK | R_OK) != -1)) {
@@ -47,10 +47,10 @@ void hakovm::init_file_streamer() {
 	return;
 
 	init_file_error:
-		hako_error("Could not open input file: \"%s\"", this->filename);
+		esteh_error("Could not open input file: \"%s\"", this->filename);
 }
 
-int hakovm::linter(char **error) {
+int estehvm::linter(char **error) {
 	*error = (char*)malloc(sizeof(char));
 
 	this->parse_file(1);
@@ -62,29 +62,19 @@ int hakovm::linter(char **error) {
 	}
 }
 
-void hakovm::parse_file(int linter_only) {
+void estehvm::parse_file(int linter_only) {
 	this->init_file_streamer();
 
 	code_parser *parser = new code_parser();
-	char *buf = (char*)malloc(sizeof(char) * (HAKO_FILE_BUFFER + 1));
-
-	size_t read_bytes;
-
-	while (!feof(this->hdf)) {
-		read_bytes = fread(buf, 1, HAKO_FILE_BUFFER, this->hdf);
-		parser->buf_read(buf, read_bytes);
-		parser->build_opcode();
-		if (!parser->is_ok()) {
-			memcpy(this->error_parse, parser->get_error(), parser->get_error_length());
-			break;
-		}
-	}
-
-	free(buf); buf = nullptr;
+	parser->add_file_handler(this->hdf, this->error_parse);
+	parser->build_opcode();
 
 	parser->finish();
 
 	free(parser);
 	parser = nullptr;
+
+	printf("Done\n");
+	sleep(100);
 
 }

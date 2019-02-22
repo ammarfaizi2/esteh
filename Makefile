@@ -4,7 +4,7 @@ LINKER = g++
 DEBUG_MODE = 1
 
 ROOT_DIR = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-TARGET_BIN = ${ROOT_DIR}/hako
+TARGET_BIN = ${ROOT_DIR}/esteh
 INC = -I${ROOT_DIR}/include
 SRC = ${ROOT_DIR}/src
 

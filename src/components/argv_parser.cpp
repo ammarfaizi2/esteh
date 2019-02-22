@@ -1,14 +1,16 @@
 
-#include <hako_debug.h>
-#include <hako/error.hpp>
-#include <hako/hako_opt.hpp>
-#include <hako/argv_parser.hpp>
+#include <esteh_debug.h>
+#include <esteh/error.hpp>
+#include <esteh/esteh_opt.hpp>
+#include <esteh/argv_parser.hpp>
+
+#include "version.h"
 
 argv_parser::argv_parser() {
 
 }
 
-void argv_parser::a1_opts(int offset, hako_opt *opt, char *arg, int arglen) {
+void argv_parser::a1_opts(int offset, esteh_opt *opt, char *arg, int arglen) {
 
 	opt->param = nullptr;
 	this->opt_count++;
@@ -16,15 +18,26 @@ void argv_parser::a1_opts(int offset, hako_opt *opt, char *arg, int arglen) {
 	switch (*arg) {
 		case 'l':
 			#ifdef HKDBG
-				opt->opt_name = (char*)malloc(sizeof("linter_only"));
+				opt->opt_name = (char*)malloc(sizeof(char) * (strlen("linter_only") + 1));
 				sprintf(opt->opt_name, "linter_only");
 			#endif
 			opt->opt_code = OPT_LINTER_ONLY;
 			opt->need_param = 0;
 		break;
 
+		case 'v':
+			#ifdef HKDBG
+				opt->opt_name = (char*)malloc(sizeof(char) * (strlen("version_number") + 1));
+				sprintf(opt->opt_name, "version_number");
+			#endif
+			opt->opt_code = OPT_LINTER_ONLY;
+			opt->need_param = 0;
+			printf("Hako %s\n", ESTEH_VERSION);
+			exit(0);
+		break;
+
 		default:
-			hako_error("Unknown option \"-%c\" (offset %d)", *arg, offset);
+			esteh_error("Unknown option \"-%c\" (offset %d)", *arg, offset);
 		break;
 	}
 
@@ -33,13 +46,13 @@ void argv_parser::a1_opts(int offset, hako_opt *opt, char *arg, int arglen) {
 			opt->param = (char*)malloc(sizeof(char) * arglen);
 			memcpy(opt->param, arg+1, sizeof(char) * arglen);
 		} else if (offset >= (this->argc - 1)) {
-			hako_error("Option \"-%c\" needs a parameter! (offset %d)", *arg, offset);
+			esteh_error("Option \"-%c\" needs a parameter! (offset %d)", *arg, offset);
 		}
 	} else {
 		if (arglen > 1) {
 			opt->param = (char*)malloc(sizeof(char) * arglen);
 			memcpy(opt->param, arg+1, sizeof(char) * arglen);
-			hako_error(
+			esteh_error(
 				"\tOption \"-%c\" doesn't need any parameter. But, a parameter given. (offset %d)"\
 				"\n\tDetected parameter: \"-%c\" \"%s\"",
 				*arg,
@@ -51,11 +64,11 @@ void argv_parser::a1_opts(int offset, hako_opt *opt, char *arg, int arglen) {
 	}
 }
 
-void argv_parser::a2_opts(int offset, hako_opt *opt, char *arg) {
+void argv_parser::a2_opts(int offset, esteh_opt *opt, char *arg) {
 	
 }
 
-int argv_parser::run(int argc, char **argv, char **filename, hako_opt **opts) {
+int argv_parser::run(int argc, char **argv, char **filename, esteh_opt **opts) {
 
 	this->argc = argc;
 	this->argv_ptr = argv;
@@ -75,7 +88,7 @@ int argv_parser::run(int argc, char **argv, char **filename, hako_opt **opts) {
 		}
 
 		l = strlen($argv);
-		$opts = (hako_opt *)malloc(sizeof(hako_opt));
+		$opts = (esteh_opt *)malloc(sizeof(esteh_opt));
 
 		if (l == 0) continue;
 

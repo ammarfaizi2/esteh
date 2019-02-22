@@ -6,7 +6,7 @@
 *.swp
 *.swo
 *.lock
-/hako
+/esteh
 /.gdb_history
-/peda-session-hako.txt
-!/test.hk
+/peda-session-esteh.txt
+!/test.tea

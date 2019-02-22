@@ -1,7 +1,7 @@
 
-#include <hako/error.hpp>
+#include <esteh/error.hpp>
 
-void _hako_error(int exit_code, const char *msg, ...) {
+void _esteh_error(int exit_code, const char *msg, ...) {
 	fprintf(stderr, "Error: ");
 	va_list arg;
 	va_start(arg, msg);
@@ -11,7 +11,7 @@ void _hako_error(int exit_code, const char *msg, ...) {
 	exit(exit_code);
 }
 
-void hako_error(const char *msg, ...) {
+void esteh_error(const char *msg, ...) {
 	fprintf(stderr, "Error: ");
 	va_list arg;
 	va_start(arg, msg);
