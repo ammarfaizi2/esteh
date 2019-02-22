@@ -1,4 +1,5 @@
 
+#include <sys/mman.h>
 #include <esteh/vm/token.hpp>
 #include <esteh/vm/estehvm.hpp>
 #include <esteh/vm/code_parser.hpp>
@@ -48,7 +49,7 @@ void code_parser::buf_read() {
 
 void code_parser::build_opcode() {
 	printf("Before...\n");
-	sleep(10);
+	sleep(5);
 	#define $rb this->buf_code[i]
 
 	char *token;
@@ -170,14 +171,14 @@ void code_parser::build_opcode() {
 			continue;
 		}
 
-		switch (opcodes[i]->code) {
-			case TD_ECHO:
-				fprintf(stdout, "%s", opcodes[i+1]->content);
-				free(opcodes[i+1]->content);
-				opcodes[i+1]->content = nullptr;
-				skip = 1;
-			break;
-		}
+		// switch (opcodes[i]->code) {
+		// 	case TD_ECHO:
+		// 		fprintf(stdout, "%s", opcodes[i+1]->content);
+		// 		free(opcodes[i+1]->content);
+		// 		opcodes[i+1]->content = nullptr;
+		// 		skip = 1;
+		// 	break;
+		// }
 
 		free(opcodes[i]);
 		opcodes[i] = nullptr;
@@ -186,6 +187,7 @@ void code_parser::build_opcode() {
 	printf("\nDone, before freed\n");
 	sleep(10);
 
+	munmap(opcodes, (opcodes_size * sizeof(esteh_opcode *)));
 	free(opcodes);
 	opcodes = nullptr;
 
