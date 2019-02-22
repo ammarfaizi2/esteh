@@ -47,6 +47,18 @@ void code_parser::buf_read() {
 	}
 }
 
+void code_parser::init_opcache_dir() {
+
+	
+		
+	if (stat(ESTEH_DIR_OPCACHE, &st) == -1) {
+		#ifdef ESTEH_DEBUG
+			printf("mkdir %s\n", ESTEH_DIR_OPCACHE);
+		#endif
+	    mkdir(ESTEH_DIR_OPCACHE, 0700);
+	}
+}
+
 void code_parser::build_opcode() {
 	printf("Before...\n");
 	sleep(5);
