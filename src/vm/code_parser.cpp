@@ -1,10 +1,17 @@
 
+
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
 #include <sys/mman.h>
+#include <sys/types.h>
+#include <esteh/error.hpp>
 #include <esteh/vm/token.hpp>
 #include <esteh/vm/estehvm.hpp>
 #include <esteh/vm/code_parser.hpp>
 
 #define ESTEH_FILE_BUFFER 1024
+#define ESTEH_DIR_OPCACHE "__teacache__"
 
 code_parser::code_parser() {
 	this->buf_code = (char*)malloc(sizeof(char) * (ESTEH_FILE_BUFFER + 1));
@@ -48,8 +55,7 @@ void code_parser::buf_read() {
 }
 
 void code_parser::init_opcache_dir() {
-
-	
+	struct stat st = {0};
 		
 	if (stat(ESTEH_DIR_OPCACHE, &st) == -1) {
 		#ifdef ESTEH_DEBUG
@@ -60,11 +66,10 @@ void code_parser::init_opcache_dir() {
 }
 
 void code_parser::build_opcode() {
-	printf("Before...\n");
-	sleep(5);
-	#define $rb this->buf_code[i]
 
-	char *token;
+	#define $rb this->buf_code[i]
+	printf("build_opcode\n");
+	// char token[ESTEH_FILE_BUFFER];
 	int in_dquo = 0,
 		in_te = 0,
 		line = 1,
@@ -73,7 +78,7 @@ void code_parser::build_opcode() {
 	size_t opcodes_size = 0;
 
 	// Initialize token with 1 char allocation.
-	token = (char *)malloc(sizeof(char));
+	char *token = (char *)malloc(sizeof(char));
 
 	size_t token_size = 0;
 
@@ -164,10 +169,7 @@ void code_parser::build_opcode() {
 	fclose(this->hdf);
 	this->hdf = nullptr;
 
-	free(token);
 	free(this->buf_code);
-
-	token = nullptr;
 	this->buf_code = nullptr;
 
 	int skip = 0;
@@ -183,26 +185,19 @@ void code_parser::build_opcode() {
 			continue;
 		}
 
-		// switch (opcodes[i]->code) {
-		// 	case TD_ECHO:
-		// 		fprintf(stdout, "%s", opcodes[i+1]->content);
-		// 		free(opcodes[i+1]->content);
-		// 		opcodes[i+1]->content = nullptr;
-		// 		skip = 1;
-		// 	break;
-		// }
+		switch (opcodes[i]->code) {
+			case TD_ECHO:
+				fprintf(stdout, "%s", opcodes[i+1]->content);
+				free(opcodes[i+1]->content);
+				opcodes[i+1]->content = nullptr;
+				skip = 1;
+			break;
+		}
 
 		free(opcodes[i]);
 		opcodes[i] = nullptr;
 	}
 
-	printf("\nDone, before freed\n");
-	sleep(10);
-
-	munmap(opcodes, (opcodes_size * sizeof(esteh_opcode *)));
 	free(opcodes);
 	opcodes = nullptr;
-
-	printf("\nDone, freed\n");
-	sleep(10);
 }

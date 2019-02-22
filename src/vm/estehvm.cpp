@@ -1,4 +1,6 @@
 
+#include <sys/wait.h>
+#include <sys/types.h>
 #include <esteh/error.hpp>
 #include <esteh/esteh_opt.hpp>
 #include <esteh/vm/estehvm.hpp>
@@ -64,17 +66,22 @@ int estehvm::linter(char **error) {
 
 void estehvm::parse_file(int linter_only) {
 	this->init_file_streamer();
+	int pid;
 
-	code_parser *parser = new code_parser();
-	parser->add_file_handler(this->hdf, this->error_parse);
-	parser->build_opcode();
+	if (!(pid = fork())) {
+		code_parser *parser = new code_parser();
+		parser->add_file_handler(this->hdf, this->error_parse);
+		parser->build_opcode();
+		parser->finish();
+		free(parser);
+		parser = nullptr;
+		sleep(10);
+		exit(0);
+	}
 
-	parser->finish();
+	int status;
+	waitpid(pid, &status, WUNTRACED);
 
-	free(parser);
-	parser = nullptr;
-
-	printf("\nDone\n");
+	printf("End\n");
 	sleep(100);
-
 }

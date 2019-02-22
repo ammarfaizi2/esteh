@@ -16,6 +16,7 @@ public:
 	size_t get_error_length();
 	char *get_error();
 	void add_file_handler(FILE *, char *);
+	void init_opcache_dir();
 private:
 	void buf_read();
 	int token_d(char *);
