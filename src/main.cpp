@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 	int opt_count = ((argv_parser *)st)->run(argc, argv, &filename, opts);
 	free(st);
 	st = nullptr;
-
+printf("me\n")
 	// Debug only.
 	#ifdef ESTEH_DEBUG
 		printf("Debug Mode: On\n\n");
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 		printf("Filename: %s\n", filename);
 		printf("Running esteh...\n\n");
 	#endif
-
+ printf("me\n");
 	st = new estehvm(filename, opt_count, opts);
 	((estehvm *)st)->run();
 	free(st); st = nullptr;

@@ -41,17 +41,18 @@ int code_parser::token_d(char *token) {
 	return T_UNKNOWN;
 }
 
-void code_parser::add_file_handler(FILE * hdf, char *error_parse) {
-	this->hdf = hdf;
-	this->error_parse = error_parse;
-}
-
-
-void code_parser::buf_read() {
-	this->read_bytes = fread(this->buf_code, 1, ESTEH_FILE_BUFFER, this->hdf);
-	if (!this->is_ok()) {
-		memcpy(this->error_parse, this->get_error(), this->get_error_length());
+void code_parser::set_file(char *filename) {
+	this->filename = filename;
+	printf("set\n");
+	this->file_fd = open(this->filename, O_RDONLY);
+	struct stat st;
+	if (fstat(this->file_fd, &st)) {
+		esteh_error("Could not open file \"%s\"", this->filename);
+		exit(1);
 	}
+	this->filesize = st.st_size;
+	this->map = (char *)mmap(NULL, this->filesize, PROT_READ, MAP_PRIVATE, this->file_fd, 0);
+	printf("set ok\n");
 }
 
 void code_parser::init_opcache_dir() {
@@ -63,29 +64,26 @@ void code_parser::init_opcache_dir() {
 		#endif
 	    mkdir(ESTEH_DIR_OPCACHE, 0700);
 	}
+
 }
 
 void code_parser::build_opcode() {
 
-	#define $rb this->buf_code[i]
-	printf("build_opcode\n");
-	// char token[ESTEH_FILE_BUFFER];
+	#define $rb this->map[i]
+
 	int in_dquo = 0,
 		in_te = 0,
 		line = 1,
 		dquo_escaped = 0;
+
 	esteh_opcode **opcodes = (esteh_opcode **)malloc(sizeof(esteh_opcode *));
 	size_t opcodes_size = 0;
 
 	// Initialize token with 1 char allocation.
 	char *token = (char *)malloc(sizeof(char));
-
 	size_t token_size = 0;
 
-	do {
-		this->buf_read();
-
-		for (size_t i = 0; i < this->read_bytes; ++i) {
+		for (size_t i = 0; i < this->filesize; ++i) {
 			
 			if ($rb == 10) {
 				line++;
@@ -162,19 +160,12 @@ void code_parser::build_opcode() {
 			}
 		}
 
-		this->read_bytes = 0;
-
-	} while (!feof(this->hdf));
-	
-	fclose(this->hdf);
-	this->hdf = nullptr;
-
-	free(this->buf_code);
-	this->buf_code = nullptr;
-
+	munmap(this->map, this->filesize);
+	this->map = nullptr;
+	close(this->file_fd);
+	free(token);
+	token = nullptr;
 	int skip = 0;
-
-
 
 	// Run opcode.
 
@@ -190,10 +181,11 @@ void code_parser::build_opcode() {
 				fprintf(stdout, "%s", opcodes[i+1]->content);
 				free(opcodes[i+1]->content);
 				opcodes[i+1]->content = nullptr;
+				free(opcodes[i+1]);
+				opcodes[i+1] = nullptr;
 				skip = 1;
 			break;
 		}
-
 		free(opcodes[i]);
 		opcodes[i] = nullptr;
 	}

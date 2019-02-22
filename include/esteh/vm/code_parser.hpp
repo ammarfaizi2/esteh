@@ -15,13 +15,17 @@ public:
 	int is_ok();
 	size_t get_error_length();
 	char *get_error();
-	void add_file_handler(FILE *, char *);
+	void set_file(char *);
 	void init_opcache_dir();
 private:
 	void buf_read();
 	int token_d(char *);
-	FILE *hdf;
+	int file_fd;
+	size_t filesize;
+	
+	char *map;
 	char *buf_code;
+	char *filename;
 	char *error_parse;
 	size_t read_bytes;
 };
