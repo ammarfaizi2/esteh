@@ -32,22 +32,22 @@ void estehvm::run() {
 
 void estehvm::init_file_streamer() {
 
-	// Make sure that the file exists and readable.
-	if(!(access(this->filename, F_OK | R_OK) != -1)) {
-		goto init_file_error;
-	}
+	// // Make sure that the file exists and readable.
+	// if(!(access(this->filename, F_OK | R_OK) != -1)) {
+	// 	goto init_file_error;
+	// }
 
-	// Open a file handle to read.
-	this->hdf = fopen(this->filename, "r");
+	// // Open a file handle to read.
+	// this->hdf = fopen(this->filename, "r");
 
-	if (this->hdf == NULL) {
-		goto init_file_error;
-	}
+	// if (this->hdf == NULL) {
+	// 	goto init_file_error;
+	// }
 
-	return;
+	// return;
 
-	init_file_error:
-		esteh_error("Could not open input file: \"%s\"", this->filename);
+	// init_file_error:
+	// 	esteh_error("Could not open input file: \"%s\"", this->filename);
 }
 
 int estehvm::linter(char **error) {
@@ -64,17 +64,10 @@ int estehvm::linter(char **error) {
 
 void estehvm::parse_file(int linter_only) {
 	this->init_file_streamer();
-
 	code_parser *parser = new code_parser();
-	parser->add_file_handler(this->hdf, this->error_parse);
+	parser->set_file(this->filename, this->error_parse);
 	parser->build_opcode();
-
 	parser->finish();
-
 	free(parser);
 	parser = nullptr;
-
-	printf("\nDone\n");
-	sleep(100);
-
 }
