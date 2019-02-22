@@ -149,11 +149,14 @@ void code_parser::build_opcode() {
 	} while (!feof(this->hdf));
 	
 	fclose(this->hdf);
+	this->hdf = nullptr;
 
 	free(token);
+	free(this->hdf);
 	free(this->buf_code);
-	this->buf_code = nullptr;
+
 	token = nullptr;
+	this->buf_code = nullptr;
 
 	int skip = 0;
 
@@ -181,12 +184,12 @@ void code_parser::build_opcode() {
 		opcodes[i] = nullptr;
 	}
 
-	printf("Done, before freed\n");
+	printf("\nDone, before freed\n");
 	sleep(10);
 
 	free(opcodes);
 	opcodes = nullptr;
 
-	printf("Done, freed\n");
+	printf("\nDone, freed\n");
 	sleep(10);
 }
