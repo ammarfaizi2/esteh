@@ -152,7 +152,6 @@ void code_parser::build_opcode() {
 	this->hdf = nullptr;
 
 	free(token);
-	free(this->hdf);
 	free(this->buf_code);
 
 	token = nullptr;
