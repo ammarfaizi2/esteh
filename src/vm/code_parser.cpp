@@ -181,7 +181,12 @@ void code_parser::build_opcode() {
 		opcodes[i] = nullptr;
 	}
 
+	printf("Done, before freed\n");
+	sleep(10);
+
 	free(opcodes);
 	opcodes = nullptr;
 
+	printf("Done, freed\n");
+	sleep(10);
 }

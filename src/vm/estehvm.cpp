@@ -74,7 +74,7 @@ void estehvm::parse_file(int linter_only) {
 	free(parser);
 	parser = nullptr;
 
-	printf("Done\n");
+	printf("\nDone\n");
 	sleep(100);
 
 }
