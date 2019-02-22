@@ -32,7 +32,7 @@ void argv_parser::a1_opts(int offset, esteh_opt *opt, char *arg, int arglen) {
 			#endif
 			opt->opt_code = OPT_LINTER_ONLY;
 			opt->need_param = 0;
-			printf("Hako %s\n", ESTEH_VERSION);
+			printf("Esteh %s\n", ESTEH_VERSION);
 			exit(0);
 		break;
 
