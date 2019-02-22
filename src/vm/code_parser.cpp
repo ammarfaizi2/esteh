@@ -157,6 +157,10 @@ void code_parser::build_opcode() {
 
 	int skip = 0;
 
+
+
+	// Run opcode.
+
 	for (size_t i = 0; i < opcodes_size; ++i) {
 
 		if (skip) {
