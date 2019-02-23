@@ -26,11 +26,14 @@ int main(int argc, char *argv[])
 
 	esteh_opt **opts = (esteh_opt**)malloc(sizeof(esteh_opt *));
 	char *filename;
-
-	void *st = new argv_parser;
-	int opt_count = ((argv_parser *)st)->run(argc, argv, &filename, opts);
-	free(st);
-	st = nullptr;
+	int opt_count;
+	
+	{
+		argv_parser *st = new argv_parser;
+		opt_count = st->run(argc, argv, &filename, opts);
+		delete st;
+		st = nullptr;
+	}
 
 	// Debug only.
 	#ifdef ESTEH_DEBUG
@@ -48,9 +51,14 @@ int main(int argc, char *argv[])
 		printf("Filename: %s\n", filename);
 		printf("Running esteh...\n\n");
 	#endif
-	st = new estehvm(filename, opt_count, opts);
-	((estehvm *)st)->run();
-	free(st); st = nullptr;
+	
+	{
+		estehvm *st = new estehvm(filename, opt_count, opts);
+		st->run();
+		delete st;
+		st = nullptr;
+	}
+
 	free(filename); filename = nullptr;
 	free(*opts); *opts = nullptr;
 	free(opts); opts = nullptr;
