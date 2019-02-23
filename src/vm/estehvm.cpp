@@ -6,7 +6,6 @@
 #include <esteh/vm/code_parser.hpp>
 
 estehvm::estehvm(char *filename, int opt_count, esteh_opt **opts) {
-	printf("me q\n")
 	this->filename = filename;
 	this->opt_count = opt_count;
 	this->opts = opts;
@@ -28,7 +27,6 @@ void estehvm::run() {
 			break;
 		}
 	}
-  printf("me\n");
 	this->parse_file(0);
 }
 

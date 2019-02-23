@@ -8,6 +8,14 @@ typedef struct _esteh_opcode {
 	char *content;
 } esteh_opcode;
 
+typedef struct _opcode_sv {
+	int code;
+	int line;
+	int c_start;
+	int c_size;
+} opcode_sv;
+
+
 #define T_UNKNOWN -1
 #define TD_ECHO 0xd001
 

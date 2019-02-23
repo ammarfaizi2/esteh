@@ -22,7 +22,6 @@ private:
 	int token_d(char *);
 	int file_fd;
 	size_t filesize;
-	
 	char *map;
 	char *buf_code;
 	char *filename;
