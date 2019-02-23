@@ -70,18 +70,19 @@ void code_parser::build_opcode() {
 	FILE *eh = fopen("__teacache__/test2.tea.tec.s", "rb");
 	FILE *qh = fopen("__teacache__/test2.tea.tec", "rb");
 	opcode_sv me;
+	fseek(qh, sizeof(opcode_sv) * 2 - 2, 1);
 	fread(&me, sizeof(opcode_sv), 1, qh);
-	fread(&me, sizeof(opcode_sv), 1, qh);
-	fread(&me, sizeof(opcode_sv), 1, qh);
-	fread(&me, sizeof(opcode_sv), 1, qh);
+	//fread(&me, sizeof(opcode_sv), 1, qh);
+	//fread(&me, sizeof(opcode_sv), 1, qh);
+	//fread(&me, sizeof(opcode_sv), 1, qh);
 	fclose(qh);
-	printf("%d\n", me.c_size);
+	printf("line: %d\n", me.line);
+	printf("code: %x\n", me.code);
+	printf("size: %d\n", me.c_size);
 	char *buf = (char *)malloc(me.c_size);
 	fread(buf, me.c_size, 1, eh);
-	printf("%s\n", buf);
-	exit(0);
-
-
+	printf("buf \"%s\"\n", buf);
+	exit(0); //*/
 	#define $rb this->map[i]
 	this->init_opcache_dir();
 	int in_dquo = 0,
@@ -100,10 +101,15 @@ void code_parser::build_opcode() {
  		char opcache_file2[strlen(opcache_file) + 3];
  		sprintf(opcache_file2, "%s.s", opcache_file);
  		
- 		FILE *oph = fopen(opcache_file, "wb");
- 		FILE *ophc = fopen(opcache_file2, "wb");
+ 	/*	FILE *oph = fopen(opcache_file, "wb");
+ 		FILE *ophc = fopen(opcache_file2, "wb");*/
  		size_t ophc_offset = 0;
- 	
+ 		
+ 		int ophfd = open(opcache_file, O_CREAT | O_RDWR, (mode_t)07000); 
+ 		int ophcfd = open(opcache_file2, O_CREAT | O_RDWR, (mode_t)07000);
+ 		char *ophmap = (char *)mmap(NULL, sizeof(opcode_sv) * 10000, PROT_READ | PROT_WRITE, MAP_PRIVATE, ophfd, 0);
+ 	  lseek(ophfd, sizeof(opcode_sv) * 10000, SEEK_SET);
+ 	  write(ophfd, "", 1);
  		opcode_sv opsv;
  	
 		for (size_t i = 0; i < this->filesize; ++i) {
@@ -121,13 +127,14 @@ void code_parser::build_opcode() {
 			   opsv.code = 	opcodes[opcodes_size]->code = TE_STRING;
 					opcodes[opcodes_size]->content = (char *)malloc(sizeof(char) * (token_size + 1));
 					memcpy(opcodes[opcodes_size]->content, token, sizeof(char) * (token_size + 1));
-					opcodes_size++;
 					t_opcodes_size += (sizeof(char) * (token_size + 1));
 					opsv.c_start = ophc_offset;
 					opsv.c_size = sizeof(char) * (token_size + 1);
-					fwrite(&opsv, sizeof(opsv), 1, oph);
-					fwrite(token, sizeof(char) * (token_size + 1), 1, ophc);
+					/*fwrite(&opsv, sizeof(opsv), 1, oph);
+					fwrite(token, sizeof(char) * (token_size + 1), 1, ophc);*/
+					memcpy(ophmap+(sizeof(opcode_sv) * opcodes_size), &opsv, sizeof(opcode_sv));
 					ophc_offset += sizeof(char) * (token_size + 1);
+					opcodes_size++;
 					in_dquo = 0;
 					token_size = 0;
 				} else {
@@ -182,16 +189,17 @@ void code_parser::build_opcode() {
 					exit(1);
 				}
 				opcodes[opcodes_size]->content = nullptr;
-				opcodes_size++;
 				opsv.c_start = 0;
 				opsv.c_size = 0;
-				fwrite(&opsv, sizeof(opsv), 1, oph);
+				memcpy(ophmap+(sizeof(opcode_sv) * opcodes_size), &opsv, sizeof(opcode_sv));
+				opcodes_size++;
+				// fwrite(&opsv, sizeof(opsv), 1, oph);
 				in_te = 0;
 				token_size = 0;
 			}
 		}
-	fclose(oph);
-	fclose(ophc);
+	/*fclose(oph);
+	fclose(ophc);*/
 	munmap(this->map, this->filesize);
 	this->map = nullptr;
 	close(this->file_fd);
