@@ -4,6 +4,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <esteh/vm/opcode.hpp>
 
 class code_parser
 {
@@ -20,6 +21,8 @@ public:
 private:
 	void buf_read();
 	int token_d(char *);
+	uint32_t parse_file(esteh_opcode ***);
+	char escape_char(char);
 	int file_fd;
 	size_t filesize;
 	char *map;

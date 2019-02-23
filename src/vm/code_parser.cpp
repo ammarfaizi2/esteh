@@ -1,14 +1,16 @@
 
-
+#include <math.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <esteh/error.hpp>
-#include <esteh/vm/token.hpp>
+#include <esteh/vm/opcode.hpp>
 #include <esteh/vm/estehvm.hpp>
 #include <esteh/vm/code_parser.hpp>
+
+#include "escape_char.hpp"
 
 #define ESTEH_FILE_BUFFER 1024
 #define ESTEH_DIR_OPCACHE "__teacache__"
@@ -67,160 +69,27 @@ void code_parser::init_opcache_dir() {
 
 void code_parser::build_opcode() {
 
-	FILE *eh = fopen("__teacache__/test2.tea.tec.s", "rb");
-	FILE *qh = fopen("__teacache__/test2.tea.tec", "rb");
-	opcode_sv me;
-	fseek(qh, sizeof(opcode_sv) * 2 - 2, 1);
-	fread(&me, sizeof(opcode_sv), 1, qh);
-	//fread(&me, sizeof(opcode_sv), 1, qh);
-	//fread(&me, sizeof(opcode_sv), 1, qh);
-	//fread(&me, sizeof(opcode_sv), 1, qh);
-	fclose(qh);
-	printf("line: %d\n", me.line);
-	printf("code: %x\n", me.code);
-	printf("size: %d\n", me.c_size);
-	char *buf = (char *)malloc(me.c_size);
-	fread(buf, me.c_size, 1, eh);
-	printf("buf \"%s\"\n", buf);
-	exit(0); //*/
 	#define $rb this->map[i]
 	this->init_opcache_dir();
-	int in_dquo = 0,
-		in_te = 0,
-		line = 1,
-		dquo_escaped = 0;
 
 	esteh_opcode **opcodes = (esteh_opcode **)malloc(sizeof(esteh_opcode *));
-	size_t opcodes_size = 0, t_opcodes_size = sizeof(esteh_opcode **) + sizeof(esteh_opcode *) + sizeof(esteh_opcode);
-	
-	// Initialize token with 1 char allocation.
-	char *token = (char *)malloc(sizeof(char));
-	size_t token_size = 0;
-	char opcache_file[sizeof(ESTEH_DIR_OPCACHE) + strlen(this->filename) + 5];
- 	sprintf(opcache_file, ESTEH_DIR_OPCACHE "/%s.tec", this->filename);	
- 		char opcache_file2[strlen(opcache_file) + 3];
- 		sprintf(opcache_file2, "%s.s", opcache_file);
- 		
- 	/*	FILE *oph = fopen(opcache_file, "wb");
- 		FILE *ophc = fopen(opcache_file2, "wb");*/
- 		size_t ophc_offset = 0;
- 		
- 		int ophfd = open(opcache_file, O_CREAT | O_RDWR, (mode_t)07000); 
- 		int ophcfd = open(opcache_file2, O_CREAT | O_RDWR, (mode_t)07000);
- 		char *ophmap = (char *)mmap(NULL, sizeof(opcode_sv) * 10000, PROT_READ | PROT_WRITE, MAP_PRIVATE, ophfd, 0);
- 	  lseek(ophfd, sizeof(opcode_sv) * 10000, SEEK_SET);
- 	  write(ophfd, "", 1);
- 		opcode_sv opsv;
- 	
-		for (size_t i = 0; i < this->filesize; ++i) {
-			if ($rb == 10) {
-				line++;
-			}
-
-			if ($rb == '"') {
-				if (in_dquo) {
-					/* End of a string. */
-					opcodes = (esteh_opcode **)realloc(opcodes, sizeof(esteh_opcode *) * (opcodes_size + 1));
-					opcodes[opcodes_size] = (esteh_opcode *)malloc(sizeof(esteh_opcode));
-					t_opcodes_size += (sizeof(esteh_opcode *) * (opcodes_size + 1)) + sizeof(esteh_opcode);
-					opsv.line = opcodes[opcodes_size]->line = line;
-			   opsv.code = 	opcodes[opcodes_size]->code = TE_STRING;
-					opcodes[opcodes_size]->content = (char *)malloc(sizeof(char) * (token_size + 1));
-					memcpy(opcodes[opcodes_size]->content, token, sizeof(char) * (token_size + 1));
-					t_opcodes_size += (sizeof(char) * (token_size + 1));
-					opsv.c_start = ophc_offset;
-					opsv.c_size = sizeof(char) * (token_size + 1);
-					/*fwrite(&opsv, sizeof(opsv), 1, oph);
-					fwrite(token, sizeof(char) * (token_size + 1), 1, ophc);*/
-					memcpy(ophmap+(sizeof(opcode_sv) * opcodes_size), &opsv, sizeof(opcode_sv));
-					ophc_offset += sizeof(char) * (token_size + 1);
-					opcodes_size++;
-					in_dquo = 0;
-					token_size = 0;
-				} else {
-					// Start of a string.
-					in_dquo = 1;
-				}
-				continue;
-			} else if (in_dquo) {
-
-				if ((!dquo_escaped) && $rb == '\\') {
-					dquo_escaped = 1;
-					continue;
-				}
-				if (dquo_escaped) {				
-					switch ($rb) {
-						case 'n':
-	 						$rb = '\n';
-						break;
-						case 't':
-							$rb = '\t';
-						break;
-					}
-					dquo_escaped = 0;
-				}
-				token = (char *)realloc(token, token_size + 2);
-				token[token_size] = $rb;
-				token[token_size + 1] = '\0';
-				token_size++;
-				continue;
-			}
-
-			if (
-				($rb >= 65 && $rb <= 90) ||
-				($rb >= 97 && $rb <= 122) ||
-				($rb == 95)
-			) {
-				if (!in_te) {
-					in_te = 1;
-				}
-				token = (char *)realloc(token, token_size + 2);
-				token[token_size] = $rb;
-				token[token_size + 1] = '\0';
-				token_size++;
-			} else if (in_te) {
-				opcodes = (esteh_opcode **)realloc(opcodes, sizeof(esteh_opcode *) * (opcodes_size + 1));
-				t_opcodes_size += (sizeof(esteh_opcode *) * (opcodes_size + 1)) + sizeof(esteh_opcode) + 1;
-				opcodes[opcodes_size] = (esteh_opcode *)malloc(sizeof(esteh_opcode));
-			 opsv.line = opcodes[opcodes_size]->line = line;
-			 opsv.code = opcodes[opcodes_size]->code = this->token_d(token);
-				if ((opcodes[opcodes_size]->code = this->token_d(token)) == T_UNKNOWN) {
-					fprintf(stderr, "Syntax Error: Unknown token \"%s\" on line %d\n", token, line);
-					exit(1);
-				}
-				opcodes[opcodes_size]->content = nullptr;
-				opsv.c_start = 0;
-				opsv.c_size = 0;
-				memcpy(ophmap+(sizeof(opcode_sv) * opcodes_size), &opsv, sizeof(opcode_sv));
-				opcodes_size++;
-				// fwrite(&opsv, sizeof(opsv), 1, oph);
-				in_te = 0;
-				token_size = 0;
-			}
-		}
-	/*fclose(oph);
-	fclose(ophc);*/
-	munmap(this->map, this->filesize);
-	this->map = nullptr;
-	close(this->file_fd);
-	free(token);
-	token = nullptr;
-	int skip = 0;
+	uint32_t opcode_count = this->parse_file(&opcodes);
+	int skip = 0;	
 	
 	// Run opcode.
 
-	for (size_t i = 0; i < opcodes_size; ++i) {
+	for (uint32_t i = 0; i < opcode_count; ++i) {
 
 		if (skip) {
 			skip = 0;
 			continue;
 		}
-
 		switch (opcodes[i]->code) {
 			case TD_ECHO:
 				fprintf(stdout, "%s", opcodes[i+1]->content);
 				free(opcodes[i+1]->content);
 				opcodes[i+1]->content = nullptr;
+
 				free(opcodes[i+1]);
 				opcodes[i+1] = nullptr;
 				skip = 1;
@@ -232,4 +101,109 @@ void code_parser::build_opcode() {
 
 	free(opcodes);
 	opcodes = nullptr;
+}
+
+uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
+
+	#define $opc (*opcodes)
+
+	// Parser conditions.
+	int in_dquo = 0,
+		in_te = 0,
+		line = 1,
+		dquo_escaped = 0;
+
+	char *token = (char *)malloc(sizeof(char));
+	size_t token_size = 0;
+
+	uint32_t opcode_count;
+
+	for (size_t i = 0; i < this->filesize; ++i) {
+
+		if ($rb == 10) {
+			line++;
+		}
+
+		if ($rb == '"') {
+			if (in_dquo) {
+				// End of a string.
+
+				// Got an opcode.
+				token[token_size] = '\0';
+				$opc = (esteh_opcode **)realloc($opc, sizeof(esteh_opcode *) * (opcode_count + 1));
+				$opc[opcode_count] = (esteh_opcode *)malloc(sizeof(esteh_opcode));
+				$opc[opcode_count]->line = line;
+				$opc[opcode_count]->code = TE_STRING;
+				$opc[opcode_count]->content = (char *)malloc(sizeof(char) * (token_size + 1));
+				memcpy($opc[opcode_count]->content, token, sizeof(char) * (token_size + 1));
+
+				opcode_count++;
+				in_dquo = 0;
+				token_size = 0;
+			} else {
+				// Start of a string.
+				in_dquo = 1;
+			}
+			continue;
+
+		} else if (in_dquo) {
+
+			if ((!dquo_escaped) && $rb == '\\') {
+				dquo_escaped = 1;
+				continue;
+			}
+
+			if (dquo_escaped) {
+				$rb = this->escape_char($rb);
+				dquo_escaped = 0;
+			}
+
+			token = (char *)realloc(token, token_size + 2);
+			token[token_size] = $rb;
+			token_size++;
+			continue;
+		}
+
+		if (
+			($rb >= 65 && $rb <= 90) ||
+			($rb >= 97 && $rb <= 122) ||
+			($rb == 95)
+		) {
+			if (!in_te) {
+				in_te = 1;
+			}
+			token = (char *)realloc(token, token_size + 2);
+			token[token_size] = $rb;
+			token_size++;
+		} else if (in_te) {
+
+			// Got an opcode.
+			token[token_size] = '\0';
+			$opc = (esteh_opcode **)realloc($opc, sizeof(esteh_opcode *) * (opcode_count + 1));
+			$opc[opcode_count] = (esteh_opcode *)malloc(sizeof(esteh_opcode));
+			$opc[opcode_count]->line = line;
+			$opc[opcode_count]->code = this->token_d(token);
+			if (($opc[opcode_count]->code = this->token_d(token)) == T_UNKNOWN) {
+				#define __erp "Syntax Error: Unknown token \"%s\" on line %d\n"
+				this->error_parse = (char *)malloc(
+					sizeof(char) * (sizeof(__erp) + strlen(token) + (floor(log10(line)) + 1))
+				);
+				sprintf(this->error_parse, __erp, token, line);
+				return 0;
+			}
+			$opc[opcode_count]->content = nullptr;
+
+			opcode_count++;
+			in_te = 0;
+			token_size = 0;
+		}
+	}
+
+	free(token);
+	token = nullptr;
+
+	munmap(this->map, this->filesize);
+	this->map = nullptr;
+	close(this->file_fd);
+	return 1;
 }
