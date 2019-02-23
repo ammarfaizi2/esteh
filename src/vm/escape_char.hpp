@@ -15,6 +15,8 @@ char code_parser::escape_char(char chr) {
 		rc('t', '\t');
 		rc('n', '\n');
 		rc('r', '\r');
+		rc('e', '\e');
+		rc('f', '\f');
 	}
 
 	return chr;
