@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 		// print filename
 		fprintf(stderr, "Filename: %s\n", filename);
 		fprintf(stderr, "Running esteh...\n\n");
-		fprintf(stdout, "Output:\n");
+		fprintf(stderr, "Output:\n");
 	#endif
 	
 	// Scope isolation.
