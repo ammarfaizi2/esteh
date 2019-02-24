@@ -10,6 +10,7 @@ class estehvm
 {
 public:
 	estehvm(char *, int, esteh_opt **ss);
+	~estehvm();
 	void run();
 	void init_file_streamer();
 	void parse_file(int);
@@ -19,7 +20,6 @@ private:
 	char *filename;
 	char *error_parse = nullptr;
 	esteh_opt **opts;
-	FILE *hdf;
 };
 
 #endif

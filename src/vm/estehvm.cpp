@@ -11,6 +11,10 @@ estehvm::estehvm(char *filename, int opt_count, esteh_opt **opts) {
 	this->opts = opts;
 }
 
+estehvm::~estehvm() {
+	free(this->filename);
+}
+
 void estehvm::run() {
 	for (int i = 0; i < this->opt_count; ++i) {
 		switch (this->opts[i]->opt_code) {
@@ -27,6 +31,7 @@ void estehvm::run() {
 			break;
 		}
 	}
+	free(this->esteh_opt);
 	this->parse_file(0);
 }
 
