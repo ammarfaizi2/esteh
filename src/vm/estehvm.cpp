@@ -12,7 +12,6 @@ estehvm::estehvm(char *filename, int opt_count, esteh_opt **opts) {
 }
 
 estehvm::~estehvm() {
-	free(this->filename);
 }
 
 void estehvm::run() {
@@ -31,7 +30,6 @@ void estehvm::run() {
 			break;
 		}
 	}
-	free(this->esteh_opt);
 	this->parse_file(0);
 }
 

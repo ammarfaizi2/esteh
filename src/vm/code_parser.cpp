@@ -59,7 +59,6 @@ void code_parser::init_opcache_dir() {
 
 void code_parser::build_opcode() {
 
-	#define $rb this->map[i]
 	this->init_opcache_dir();
 
 	esteh_opcode **opcodes = (esteh_opcode **)malloc(sizeof(esteh_opcode *));
@@ -110,6 +109,7 @@ void code_parser::build_opcode() {
 uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 
 	#define $opc (*opcodes)
+	#define $rb this->map[i]
 
 	#define __er0 "Syntax Error: Unknown token \"%s\" in \"%s\" on line %d\n"
 	#define __er1 "Syntax Error: Unterminated operation in \"%s\" on line %d\n"
@@ -129,10 +129,11 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 	#define CLEAND goto cleand
 
 	// Parser conditions.
+	uint32_t in_comment_sl = 0;
+	uint32_t in_comment_ml = 0;
 	uint32_t in_dquo = 0;
 	uint32_t in_te = 0;
 	uint32_t in_int = 0;
-	// uint32_t end_op = 0;
 	uint32_t dquo_escaped = 0;
 	uint32_t line = 1;
 
@@ -142,6 +143,33 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 	uint32_t opcode_count;
 
 	for (size_t i = 0; i < this->filesize; ++i) {
+
+		/**
+		 * Single line comment.
+		 */
+		if (in_comment_sl) {
+			while ($rb != '\n' && (i < this->filesize)) i++;
+			in_comment_sl = 0;
+		}
+		if ((!in_dquo) && $rb == '/' && this->map[i + 1] == '/') {
+			in_comment_sl = 1;
+			i++;
+			continue;
+		}
+
+		/**
+		 * Multi Line Comment
+		 */
+		if (in_comment_ml) {
+			while ($rb != '*' && this->map[i + 1] != '/' && (i < this->filesize)) i++;
+			in_comment_ml = 0;
+		}
+		if ((!in_dquo) && $rb == '/' && this->map[i + 1] == '*') {
+			in_comment_ml = 1;
+			i++;
+			continue;
+		}
+
 		if ($rb == '"') {
 			if (in_dquo) {
 				// End of a string.
@@ -247,7 +275,6 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 		if (!($rb == 9 || $rb == 32 || $rb == 10)) {
 
 		}
-
 
 		cleand:		
 		if ($rb == 10) {

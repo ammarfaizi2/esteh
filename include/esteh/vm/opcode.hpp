@@ -27,14 +27,17 @@ typedef struct _opcache_header {
 } opcache_header;
 
 #define T_UNKNOWN -1
-#define TD_PRINT 100
 
-#define TE_STRING 200
-#define TE_INT 201
+#define TC_NOTHING 100
 
-#define TE_ADD 210 // +
-#define TE_MIN 211 // -
-#define TE_MUL 212 // *
-#define TE_DIV 213 // /
+#define TD_PRINT 0b000000000
+
+#define TE_STRING 300
+#define TE_INT 301
+
+#define TE_ADD 1 // +
+#define TE_MIN 2 // -
+#define TE_MUL 4 // *
+#define TE_DIV 8 // /
 
 #endif

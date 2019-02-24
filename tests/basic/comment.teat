@@ -1,0 +1,9 @@
+--TEST--
+Test single line and multiline comment.
+--FILE--
+// This is a test
+// p "123\n"
+// print "Hello World\n"
+print "Es Teh Memang Menyegarkan"
+--EXPECT--
+Es Teh Memang Menyegarkan
