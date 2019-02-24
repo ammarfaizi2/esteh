@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 
 	// Debug only.
 	#ifdef ESTEH_DEBUG
-		fprintf(stderr, "Debug Mode: On\n\n");
+		fprintf(stderr, "Debug Mode: On\n");
 		for (int i = 0; i < opt_count; ++i) {
 			fprintf(stderr, "opt[%d]:\n", i);
 			fprintf(stderr, "  opt_code\t= %d\n", opts[i]->opt_code);
@@ -51,6 +51,7 @@ int main(int argc, char *argv[])
 		// print filename
 		fprintf(stderr, "Filename: %s\n", filename);
 		fprintf(stderr, "Running esteh...\n\n");
+		fprintf(stdout, "Output:\n");
 	#endif
 	
 	// Scope isolation.
