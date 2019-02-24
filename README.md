@@ -4,8 +4,8 @@ cd esteh
 make
 sudo cp esteh /usr/bin/esteh && sudo chmod +x /usr/bin/esteh
 
-# Hide debug message with "2>1"
-esteh test.tea 2>1
+# Hide debug message with "2>0"
+esteh test.tea 2>0
 
 # Debug message will be shown.
 esteh test.tea
