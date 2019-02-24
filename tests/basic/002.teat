@@ -2,23 +2,23 @@
 Test simple arithmatic
 
 --FILE--
-p 1
-p "\n"
+p 1;
+p "\n";
 
-p 100
-p "\n"
+p 100;
+p "\n";
 
-p 1 + 1
-p "\n"
+p 1 + 1;
+p "\n";
 
-p 3 - 2
-p "\n"
+p 3 - 2;
+p "\n";
 
-p 2 * 5
-p "\n"
+p 2 * 5;
+p "\n";
 
-p 10 / 5
-p "\n"
+p 10 / 5;
+p "\n";
 
 --EXPECT--
 1
