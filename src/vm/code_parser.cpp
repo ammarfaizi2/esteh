@@ -164,12 +164,13 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 		if (in_comment_sl) {
 			while ($rb != '\n' && (i < this->filesize)) i++;
 			in_comment_sl = false;
-		}
-		if ((!in_dquo) && $rb == '/' && this->map[i + 1] == '/') {
-			in_comment_sl = true;
-			i++;
-			continue;
-		}
+		} else {
+			if ((!in_dquo) && $rb == '/' && this->map[i + 1] == '/') {
+				in_comment_sl = true;
+				i++;
+				continue;
+			}
+		}		
 
 		/**
 		 * Multi Line Comment.
@@ -177,11 +178,12 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 		if (in_comment_ml) {
 			while ($rb != '*' && this->map[i + 1] != '/' && (i < this->filesize)) i++;
 			in_comment_ml = false;
-		}
-		if ((!in_dquo) && $rb == '/' && this->map[i + 1] == '*') {
-			in_comment_ml = true;
-			i++;
-			continue;
+		} else {
+			if ((!in_dquo) && $rb == '/' && this->map[i + 1] == '*') {
+				in_comment_ml = true;
+				i++;
+				continue;
+			}
 		}
 
 		if ($rb == '"') {
