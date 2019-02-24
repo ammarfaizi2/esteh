@@ -7,8 +7,7 @@
 *.swo
 *.lock
 /esteh
+/.phpintel/
+__teacache__
 /.gdb_history
 /peda-session-esteh.txt
-!/test.tea
-__teacache__
-/.phpintel/
