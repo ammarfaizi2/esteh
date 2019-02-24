@@ -26,10 +26,8 @@ private:
 	int file_fd;
 	size_t filesize;
 	char *map;
-	char *buf_code;
 	char *filename;
 	char *error_parse;
-	size_t read_bytes;
 };
 
 #endif

@@ -12,11 +12,9 @@
 
 #include "escape_char.hpp"
 
-#define ESTEH_FILE_BUFFER 1024
 #define ESTEH_DIR_OPCACHE "__teacache__"
 
 code_parser::code_parser() {
-	this->buf_code = (char*)malloc(sizeof(char) * (ESTEH_FILE_BUFFER + 1));
 }
 
 void code_parser::finish() {
@@ -134,7 +132,7 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 	uint32_t in_dquo = 0;
 	uint32_t in_te = 0;
 	uint32_t in_int = 0;
-	uint32_t end_op = 0;
+	// uint32_t end_op = 0;
 	uint32_t dquo_escaped = 0;
 	uint32_t line = 1;
 
