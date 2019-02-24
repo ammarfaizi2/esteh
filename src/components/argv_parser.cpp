@@ -18,7 +18,7 @@ void argv_parser::a1_opts(int offset, esteh_opt *opt, char *arg, int arglen) {
 	switch (*arg) {
 		case 'l':
 			#ifdef ESTEH_DEBUG
-				opt->opt_name = (char*)malloc(sizeof(char) * (strlen("linter_only") + 1));
+				opt->opt_name = (char*)malloc(sizeof(char) * (sizeof("linter_only") + 1));
 				sprintf(opt->opt_name, "linter_only");
 			#endif
 			opt->opt_code = OPT_LINTER_ONLY;
@@ -27,7 +27,7 @@ void argv_parser::a1_opts(int offset, esteh_opt *opt, char *arg, int arglen) {
 
 		case 'v':
 			#ifdef ESTEH_DEBUG
-				opt->opt_name = (char*)malloc(sizeof(char) * (strlen("version_number") + 1));
+				opt->opt_name = (char*)malloc(sizeof(char) * (sizeof("version_number") + 1));
 				sprintf(opt->opt_name, "version_number");
 			#endif
 			opt->opt_code = OPT_LINTER_ONLY;

@@ -146,7 +146,7 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 	for (size_t i = 0; i < this->filesize; ++i) {
 
 		/**
-		 * Syntax must be cloesd with ';'
+		 * Syntax must be cloesd with ';'.
 		 */
 		if (must_close) {
 			if ($rb != '\t' && $rb != ' ' && $rb != '\n' && $rb != ';') {
@@ -172,7 +172,7 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 		}
 
 		/**
-		 * Multi Line Comment
+		 * Multi Line Comment.
 		 */
 		if (in_comment_ml) {
 			while ($rb != '*' && this->map[i + 1] != '/' && (i < this->filesize)) i++;
