@@ -75,3 +75,6 @@ function esteh_test($file)
 foreach (glob(__DIR__."/tests/basic/*.teat") as $file) {
 	esteh_test($file);
 }
+
+
+printf("\n\nTests Passed! OK\n");
