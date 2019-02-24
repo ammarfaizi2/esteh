@@ -1,6 +1,5 @@
 --TEST--
 Trivial "Hello World" test
-
 "p", "echo" and "print" are the same token.
 --FILE--
 p "Hello World\n";

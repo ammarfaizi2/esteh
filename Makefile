@@ -35,6 +35,9 @@ ${TARGET_BIN}: ${OBJECTS}
 ${OBJECTS}:
 		${COMPILER} ${COMPILER_FLAGS} ${@:%.o=%.cpp} -o $@
 
+test:
+	php ${ROOT_DIR}/run_test.php
+
 strip:
 	${STRIP}
 
