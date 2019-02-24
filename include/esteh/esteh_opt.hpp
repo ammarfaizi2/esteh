@@ -3,6 +3,7 @@
 #define ESTEH_ESTEH_OPT_HPP
 
 #define OPT_LINTER_ONLY 1
+#define OPT_NO_DEBUG 2
 
 #include <esteh_debug.h>
 

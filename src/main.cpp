@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 	if (argc == 1) {
 		usage *st = new usage(argv[0]);
 		st->general();
-		free(st);
+		delete st;
 		st = nullptr;
 		exit(0);
 	}
@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
 	char *filename;
 	int opt_count;
 	
+	// Scope isolation.
 	{
 		argv_parser *st = new argv_parser;
 		opt_count = st->run(argc, argv, &filename, opts);
@@ -37,21 +38,22 @@ int main(int argc, char *argv[])
 
 	// Debug only.
 	#ifdef ESTEH_DEBUG
-		printf("Debug Mode: On\n\n");
+		fprintf(stderr, "Debug Mode: On\n\n");
 		for (int i = 0; i < opt_count; ++i) {
-			printf("opt[%d]:\n", i);
-			printf("  opt_code\t= %d\n", opts[i]->opt_code);
-			printf("  opt_name\t= %s\n", opts[i]->opt_name);
-			printf("  need_param\t= %d\n", opts[i]->need_param);
-			printf("  param\t\t= %s\n", opts[i]->param);	
+			fprintf(stderr, "opt[%d]:\n", i);
+			fprintf(stderr, "  opt_code\t= %d\n", opts[i]->opt_code);
+			fprintf(stderr, "  opt_name\t= %s\n", opts[i]->opt_name);
+			fprintf(stderr, "  need_param\t= %d\n", opts[i]->need_param);
+			fprintf(stderr, "  param\t\t= %s\n", opts[i]->param);	
 		}
-		printf("\n");
+		fprintf(stderr, "\n");
 
 		// print filename
-		printf("Filename: %s\n", filename);
-		printf("Running esteh...\n\n");
+		fprintf(stderr, "Filename: %s\n", filename);
+		fprintf(stderr, "Running esteh...\n\n");
 	#endif
 	
+	// Scope isolation.
 	{
 		estehvm *st = new estehvm(filename, opt_count, opts);
 		st->run();
@@ -65,6 +67,8 @@ int main(int argc, char *argv[])
 
 	// Run esteh shutdown.
 
+	// ...
+	// ...
 	// ...
 
 	// end esteh shutdown.

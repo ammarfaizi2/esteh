@@ -10,7 +10,6 @@ class usage
 {
 public:
 	usage(char *);
-	~usage();
 	void general();
 private:
 	char *appname;

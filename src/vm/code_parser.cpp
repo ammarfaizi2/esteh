@@ -35,14 +35,6 @@ size_t code_parser::get_error_length() {
 	return 0;
 }
 
-int code_parser::token_d(char *token) {
-
-	if (!strcmp(token, "echo")) {
-		return TD_ECHO;
-	}
-	return T_UNKNOWN;
-}
-
 void code_parser::set_file(char *filename) {
 	this->filename = filename;
 	this->file_fd = open(this->filename, O_RDONLY);
@@ -76,20 +68,34 @@ void code_parser::build_opcode() {
 	uint32_t opcode_count = this->parse_file(&opcodes);
 	int skip = 0;	
 	
-	// Run opcode.
+	#ifdef ESTEH_DEBUG
+		if (this->error_parse != nullptr) {
+			printf("Error Parse: %s\n\n", this->error_parse);
+		}
+	#endif
 
+	// Run opcode.
 	for (uint32_t i = 0; i < opcode_count; ++i) {
 
 		if (skip) {
 			skip = 0;
 			continue;
 		}
+
 		switch (opcodes[i]->code) {
-			case TD_ECHO:
-				fprintf(stdout, "%s", opcodes[i+1]->content);
+			case TD_PRINT:
+
+				switch (opcodes[i+1]->code) {
+					case TE_INT:
+						fprintf(stdout, "%d", *((int *)opcodes[i + 1]->content));
+					break;
+					case TE_STRING:
+						fprintf(stdout, "%s", (char *)opcodes[i+1]->content);
+					break;
+				}
+
 				free(opcodes[i+1]->content);
 				opcodes[i+1]->content = nullptr;
-
 				free(opcodes[i+1]);
 				opcodes[i+1] = nullptr;
 				skip = 1;
@@ -107,11 +113,30 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 
 	#define $opc (*opcodes)
 
+	#define __er0 "Syntax Error: Unknown token \"%s\" in \"%s\" on line %d\n"
+	#define __er1 "Syntax Error: Unterminated operation in \"%s\" on line %d\n"
+
+	#define UNKNOWN_TOKEN \
+		this->error_parse = (char *)malloc( \
+			sizeof(char) * (sizeof(__er0) + strlen(token) + (floor(log10(line)) + 1) + strlen(this->filename)) \
+		); \
+		sprintf(this->error_parse, __er0, token, this->filename, line);
+
+	#define UNTERMINATED_OP \
+		this->error_parse = (char *)malloc( \
+			sizeof(char) * ((floor(log10(line)) + 1) + strlen(this->filename)) \
+		); \
+		sprintf(this->error_parse, __er1, this->filename, line);
+
+	#define CLEAND goto cleand
+
 	// Parser conditions.
-	int in_dquo = 0,
-		in_te = 0,
-		line = 1,
-		dquo_escaped = 0;
+	uint32_t in_dquo = 0;
+	uint32_t in_te = 0;
+	uint32_t in_int = 0;
+	uint32_t end_op = 0;
+	uint32_t dquo_escaped = 0;
+	uint32_t line = 1;
 
 	char *token = (char *)malloc(sizeof(char));
 	size_t token_size = 0;
@@ -119,11 +144,6 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 	uint32_t opcode_count;
 
 	for (size_t i = 0; i < this->filesize; ++i) {
-
-		if ($rb == 10) {
-			line++;
-		}
-
 		if ($rb == '"') {
 			if (in_dquo) {
 				// End of a string.
@@ -144,13 +164,13 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 				// Start of a string.
 				in_dquo = 1;
 			}
-			continue;
+			CLEAND;
 
 		} else if (in_dquo) {
 
 			if ((!dquo_escaped) && $rb == '\\') {
 				dquo_escaped = 1;
-				continue;
+				CLEAND;
 			}
 
 			if (dquo_escaped) {
@@ -161,13 +181,13 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 			token = (char *)realloc(token, token_size + 2);
 			token[token_size] = $rb;
 			token_size++;
-			continue;
 		}
 
 		if (
-			($rb >= 65 && $rb <= 90) ||
+			(!in_dquo) &&
+			(($rb >= 65 && $rb <= 90) ||
 			($rb >= 97 && $rb <= 122) ||
-			($rb == 95)
+			($rb == 95))
 		) {
 			if (!in_te) {
 				in_te = 1;
@@ -175,7 +195,15 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 			token = (char *)realloc(token, token_size + 2);
 			token[token_size] = $rb;
 			token_size++;
+			CLEAND;
 		} else if (in_te) {
+
+			if ($rb >= 48 && $rb <= 57) {
+				token = (char *)realloc(token, token_size + 2);
+				token[token_size] = $rb;
+				token_size++;
+				continue;
+			}
 
 			// Got an opcode.
 			token[token_size] = '\0';
@@ -184,18 +212,48 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 			$opc[opcode_count]->line = line;
 			$opc[opcode_count]->code = this->token_d(token);
 			if (($opc[opcode_count]->code = this->token_d(token)) == T_UNKNOWN) {
-				#define __erp "Syntax Error: Unknown token \"%s\" on line %d\n"
-				this->error_parse = (char *)malloc(
-					sizeof(char) * (sizeof(__erp) + strlen(token) + (floor(log10(line)) + 1))
-				);
-				sprintf(this->error_parse, __erp, token, line);
+				UNKNOWN_TOKEN
 				return 0;
 			}
 			$opc[opcode_count]->content = nullptr;
-
 			opcode_count++;
 			in_te = 0;
 			token_size = 0;
+		}
+
+		if (
+			(!in_dquo) && (!in_te) &&
+			($rb >= 48 && $rb <= 57)
+		) {
+			if (!in_int) {
+				in_int = 1;
+			}
+			token = (char *)realloc(token, token_size + 2);
+			token[token_size] = $rb;
+			token_size++;
+			CLEAND;
+		} else if (in_int) {
+			// Got an opcode.
+			token[token_size] = '\0';
+			$opc = (esteh_opcode **)realloc($opc, sizeof(esteh_opcode *) * (opcode_count + 1));
+			$opc[opcode_count] = (esteh_opcode *)malloc(sizeof(esteh_opcode));
+			$opc[opcode_count]->line = line;
+			$opc[opcode_count]->code = TE_INT;
+			$opc[opcode_count]->content = malloc(sizeof(int));
+			*((int *)$opc[opcode_count]->content) = atoi(token);
+			opcode_count++;
+			in_int = 0;
+			token_size = 0;
+		}
+
+		if (!($rb == 9 || $rb == 32 || $rb == 10)) {
+
+		}
+
+
+		cleand:		
+		if ($rb == 10) {
+			line++;
 		}
 	}
 
@@ -205,5 +263,5 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 	munmap(this->map, this->filesize);
 	this->map = nullptr;
 	close(this->file_fd);
-	return 1;
+	return opcode_count;
 }

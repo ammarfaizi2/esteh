@@ -43,10 +43,10 @@ int estehvm::linter(char **error) {
 }
 
 void estehvm::parse_file(int linter_only) {
-		code_parser *parser = new code_parser();
-		parser->set_file(this->filename);
-		parser->build_opcode();
-		parser->finish();
-		free(parser);
-		parser = nullptr;
+	code_parser *parser = new code_parser();
+	parser->set_file(this->filename);
+	parser->build_opcode();
+	parser->finish();
+	free(parser);
+	parser = nullptr;
 }

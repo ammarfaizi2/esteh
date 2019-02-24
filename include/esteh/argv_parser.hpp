@@ -16,7 +16,7 @@ public:
 
 private:
 	void a1_opts(int, esteh_opt *, char *, int);
-	void a2_opts(int, esteh_opt *, char *);
+	void a2_opts(int, esteh_opt *, char *, int);
 
 	int argc;
 	int skip = 0;

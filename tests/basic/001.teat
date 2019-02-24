@@ -1,0 +1,10 @@
+--TEST--
+Trivial "Hello World" test
+--FILE--
+p "Hello World\n";
+echo "Hello World\n";
+print "Hello World\n";
+--EXPECT--
+Hello World
+Hello World
+Hello World

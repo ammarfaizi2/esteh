@@ -17,7 +17,7 @@ void argv_parser::a1_opts(int offset, esteh_opt *opt, char *arg, int arglen) {
 
 	switch (*arg) {
 		case 'l':
-			#ifdef HKDBG
+			#ifdef ESTEH_DEBUG
 				opt->opt_name = (char*)malloc(sizeof(char) * (strlen("linter_only") + 1));
 				sprintf(opt->opt_name, "linter_only");
 			#endif
@@ -26,7 +26,7 @@ void argv_parser::a1_opts(int offset, esteh_opt *opt, char *arg, int arglen) {
 		break;
 
 		case 'v':
-			#ifdef HKDBG
+			#ifdef ESTEH_DEBUG
 				opt->opt_name = (char*)malloc(sizeof(char) * (strlen("version_number") + 1));
 				sprintf(opt->opt_name, "version_number");
 			#endif
@@ -64,8 +64,42 @@ void argv_parser::a1_opts(int offset, esteh_opt *opt, char *arg, int arglen) {
 	}
 }
 
-void argv_parser::a2_opts(int offset, esteh_opt *opt, char *arg) {
-	
+void argv_parser::a2_opts(int offset, esteh_opt *opt, char *arg, int arglen) {
+	opt->param = nullptr;
+	this->opt_count++;
+
+	if (!strcmp(arg, "no-debug")) {
+		#ifdef ESTEH_DEBUG
+			opt->opt_name = (char*)malloc(sizeof(char) * (strlen("no_debug") + 1));
+			sprintf(opt->opt_name, "no_debug");
+		#endif
+		opt->opt_code = OPT_NO_DEBUG;
+		opt->need_param = 0;
+	} else {
+		esteh_error("Unknown option \"--%s\" (offset %d)", arg, offset);
+	}
+
+	/*if (opt->need_param == 1) {
+		if (arglen > 1) {
+			opt->param = (char*)malloc(sizeof(char) * arglen);
+			memcpy(opt->param, arg+1, sizeof(char) * arglen);
+		} else if (offset >= (this->argc - 1)) {
+			esteh_error("Option \"-%c\" needs a parameter! (offset %d)", *arg, offset);
+		}
+	} else {
+		if (arglen > 1) {
+			opt->param = (char*)malloc(sizeof(char) * arglen);
+			memcpy(opt->param, arg+1, sizeof(char) * arglen);
+			esteh_error(
+				"\tOption \"-%c\" doesn't need any parameter. But, a parameter given. (offset %d)"\
+				"\n\tDetected parameter: \"-%c\" \"%s\"",
+				*arg,
+				offset,
+				*arg,
+				opt->param
+			);
+		}
+	}*/
 }
 
 int argv_parser::run(int argc, char **argv, char **filename, esteh_opt **opts) {
@@ -98,6 +132,15 @@ int argv_parser::run(int argc, char **argv, char **filename, esteh_opt **opts) {
 		}
 
 		if (l >= 2 && $argv[0] == '-') {
+			if ($argv[1] == '-') {
+				if (l == 2) {
+					printf("Error: Invalid parameter \"--\" (offset %d)\n", i);
+					exit(1);
+				}
+				this->a2_opts(i, $opts, $argv+2, l - 2);
+				continue;
+			}
+
 			this->a1_opts(i, $opts, $argv+1, l - 1);
 			continue;
 		}
