@@ -30,7 +30,6 @@ void argv_parser::a1_opts(int offset, esteh_opt *opt, char *arg, int arglen) {
 				opt->opt_name = (char*)malloc(sizeof(char) * (sizeof("version_number") + 1));
 				sprintf(opt->opt_name, "version_number");
 			#endif
-			opt->opt_code = OPT_LINTER_ONLY;
 			opt->need_param = 0;
 			printf("Esteh %s\n", ESTEH_VERSION);
 			exit(0);
@@ -70,36 +69,22 @@ void argv_parser::a2_opts(int offset, esteh_opt *opt, char *arg, int arglen) {
 
 	if (!strcmp(arg, "no-debug")) {
 		#ifdef ESTEH_DEBUG
-			opt->opt_name = (char*)malloc(sizeof(char) * (strlen("no_debug") + 1));
+			opt->opt_name = (char*)malloc(sizeof(char) * (sizeof("no_debug") + 1));
 			sprintf(opt->opt_name, "no_debug");
 		#endif
 		opt->opt_code = OPT_NO_DEBUG;
 		opt->need_param = 0;
+	} else if (!strcmp(arg, "version")) {
+		#ifdef ESTEH_DEBUG
+			opt->opt_name = (char*)malloc(sizeof(char) * (sizeof("version") + 1));
+			sprintf(opt->opt_name, "no_debug");
+		#endif
+		opt->need_param = 0;
+		printf("Esteh %s\n", ESTEH_VERSION);
+		exit(0);
 	} else {
 		esteh_error("Unknown option \"--%s\" (offset %d)", arg, offset);
 	}
-
-	/*if (opt->need_param == 1) {
-		if (arglen > 1) {
-			opt->param = (char*)malloc(sizeof(char) * arglen);
-			memcpy(opt->param, arg+1, sizeof(char) * arglen);
-		} else if (offset >= (this->argc - 1)) {
-			esteh_error("Option \"-%c\" needs a parameter! (offset %d)", *arg, offset);
-		}
-	} else {
-		if (arglen > 1) {
-			opt->param = (char*)malloc(sizeof(char) * arglen);
-			memcpy(opt->param, arg+1, sizeof(char) * arglen);
-			esteh_error(
-				"\tOption \"-%c\" doesn't need any parameter. But, a parameter given. (offset %d)"\
-				"\n\tDetected parameter: \"-%c\" \"%s\"",
-				*arg,
-				offset,
-				*arg,
-				opt->param
-			);
-		}
-	}*/
 }
 
 int argv_parser::run(int argc, char **argv, char **filename, esteh_opt **opts) {

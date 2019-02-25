@@ -11,6 +11,6 @@ void usage::general() {
 	printf("Usage: %s [options] <file>\n", this->appname);
 	printf("\n");
 	printf(" Options:\n");
-	printf("\t-v\t\tVersion number\n");
-	printf("\t-l\t\tSyntax check only (lint)\n");
+	printf("\t-v, --version\t\t\tVersion number\n");
+	printf("\t-l\t\t\tSyntax check only (lint)\n");
 }
