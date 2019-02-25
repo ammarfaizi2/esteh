@@ -31,7 +31,7 @@ void code_parser::set_file(char *filename) {
 		exit(1);
 	}
 	this->filesize = st.st_size;
-	this->map = (char *)mmap(NULL, this->filesize, PROT_READ | PROT_WRITE, MAP_PRIVATE, this->file_fd, 0);
+	this->map = (char *)mmap(NULL, this->filesize + 1, PROT_READ | PROT_WRITE, MAP_PRIVATE, this->file_fd, 0);
 }
 
 void code_parser::init_opcache_dir() {
@@ -82,23 +82,21 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 
 	// Parser conditions.
 	bool in_te = false;
-	bool in_int = false;
 	bool in_dquot = false;
-	bool in_comment_sl = false;
-	bool in_comment_ml = false;
-	bool must_close = false;
 	bool dquot_escaped = false;
+	bool must_be_closed = false;
+	bool allow_operation = false;
 	uint32_t line = 1;
 	uint32_t opcode_count = 0;
 
 	// First init.
 
-	#define TOKEN_ALLOC (sizeof(char) * 1000)
+	#define TOKEN_ALLOC (sizeof(char) * 100)
 	uint32_t cur_token_alloc = TOKEN_ALLOC;
 	char *token = (char *)malloc(TOKEN_ALLOC);
 	uint32_t token_size = 0;
 
-	#define TOKENS_ALLOC (sizeof(esteh_token *) * 1000)
+	#define TOKENS_ALLOC (sizeof(esteh_token *) * 100)
 	uint32_t cur_tokens_alloc = TOKENS_ALLOC;
 	esteh_token **tokens = (esteh_token **)malloc(TOKENS_ALLOC);
 	uint32_t tokens_count = 0;
@@ -122,12 +120,38 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 			line++;
 		}
 
+		if (!in_dquot) {
+			/**
+			 * Multi line comment.
+			 */
+			if ($rb == '/' && this->map[i + 1] == '*') {
+				i += 2;
+				while (((i - 1) < this->filesize) && (!($rb == '*' && this->map[i + 1] == '/'))) i++;
+				i++;
+				continue;
+			}
+
+			/**
+			 * Single line comment.
+			 */
+			if ($rb == '/' && this->map[i + 1] == '/') {
+				i += 2;
+				while ((i < this->filesize) && $rb != '\n') i++;
+				continue;
+			}
+		}
+
 		/**
 		 * String with double quotes terminator.
 		 */
 		if ($rb == '"') {
-			
+
 			if (!in_dquot) {
+
+				if (must_be_closed) {
+					UNTERMINATED_OP
+				}
+
 				in_dquot = 1;
 				continue;
 			}
@@ -136,15 +160,20 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 
 				TOKEN_REALLOC
 
+				dquot_escaped = false;
+
 				token[token_size] = $rb;
 				token_size++;
 				continue;
 			}
 
+
+			/**
+			 * Start's end of string.
+			 */
 			TOKENS_REALLOC
 
 			token[token_size] = '\0';
-
 			tokens[tokens_count]->lineno = line;
 			tokens[tokens_count]->token  = TE_STRING;
 			tokens[tokens_count]->val.type = ESTEH_TYPE_STRING;
@@ -156,46 +185,69 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 				token_size
 			);
 
-			break;
 			in_dquot = 0;
 			token_size = 0;
+			must_be_closed = true;
+			allow_operation = true;
 			tokens_count++;
 			continue;
+			// End's end of string.
 		} else if (in_dquot) {
 
-			TOKEN_REALLOC;
-
-			if ($rb == '\\') {
-				dquot_escaped = true;
-				continue;
-			}
+			TOKEN_REALLOC
 
 			if (dquot_escaped) {
 				$rb = this->escape_char($rb);
+				dquot_escaped = false;
+			} else if ($rb == '\\') {
+				dquot_escaped = true;
+				continue;
 			}
 
 			token[token_size] = $rb;
 			token_size++;
 			continue;
+		} else // End of string with double quotes terminator.
+		
+		/**
+		 * TE tokens.
+		 */
+		if (
+			($rb >= 'A' && $rb <= 'Z') ||
+			($rb >= 'a' && $rb <= 'z') ||
+			($rb == '_')
+		) {
+			
+			if (!in_te) {
+				in_te = true;	
+			}
+
+			TOKEN_REALLOC
+
+			token[token_size] = $rb;
+			token_size++;
+			continue;
+		} else if (in_te) {
+			if ($rb >= '0' && $rb <= '9') {
+
+				TOKEN_REALLOC
+
+				token[token_size] = $rb;
+				token_size++;
+				continue;
+			}
+
+			TOKENS_REALLOC
+
+			tokens[tokens_count]->lineno = line;
+			tokens[tokens_count]->token  = this->token_d(token);
+
+			in_te = false;
+			token_size = 0;
+			continue;
 		}
-		// End of string with double quotes terminator.
 
 
-	}
-
-	if (in_dquot) {
-		UNTERMINATED_STRING
-		goto error_clean_up;
-	}
-
-	if (in_te) {
-		UNTERMINATED_OP
-		goto error_clean_up;
-	}
-
-	if (must_close) {
-		UNTERMINATED_OP
-		goto error_clean_up;
 	}
 
 	free(token);
