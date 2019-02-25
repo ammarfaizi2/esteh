@@ -25,7 +25,7 @@ MKDIR = mkdir -vp
 STRIP = strip -s ${TARGET_BIN}
 
 SOURCES = $(shell find ${SRC} -name '*.cpp')
-OBJECTS = $(SOURCES:%.cpp=%.o)
+OBJECTS = $(SOURCES:%.cpp=%.cpp.o)
 
 all: ${OBJECTS} ${TARGET_BIN}
 
@@ -33,7 +33,7 @@ ${TARGET_BIN}: ${OBJECTS}
 		${LINKER} ${LINKER_FLAGS} -o ${TARGET_BIN} ${OBJECTS}
 
 ${OBJECTS}:
-		${COMPILER} ${COMPILER_FLAGS} ${@:%.o=%.cpp} -o $@
+		${COMPILER} ${COMPILER_FLAGS} ${@:%.o=%} -o $@
 
 test:
 	php ${ROOT_DIR}/run_test.php
