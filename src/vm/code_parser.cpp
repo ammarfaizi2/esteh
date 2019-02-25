@@ -98,43 +98,43 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 	for (size_t i = 0; i < this->filesize; ++i) {
 
 
-		if ((i > 0) && (!in_dquo) && (!in_te) && (!in_int)) {
-			switch ($rb) {
-				case '+':
-					$opc = (esteh_opcode **)realloc($opc, sizeof(esteh_opcode *) * (opcode_count + 1));
-					$opc[opcode_count]->lineno = line;
-					$opc[opcode_count]->code = TF_ADD;
-					opcode_count++;
-					if (
-						$opc[opcode_count - 1]->code == TD_PRINT &&
-						$opc[opcode_count - 1]->op1.type == ESTEH_TYPE_INT
-					) {
-						$opc[opcode_count]->op1 = ;
-					}
-				break;
+		// if ((i > 0) && (!in_dquo) && (!in_te) && (!in_int)) {
+		// 	switch ($rb) {
+		// 		case '+':
+		// 			$opc = (esteh_opcode **)realloc($opc, sizeof(esteh_opcode *) * (opcode_count + 1));
+		// 			$opc[opcode_count]->lineno = line;
+		// 			$opc[opcode_count]->code = TF_ADD;
+		// 			opcode_count++;
+		// 			if (
+		// 				$opc[opcode_count - 1]->code == TD_PRINT &&
+		// 				$opc[opcode_count - 1]->op1.type == ESTEH_TYPE_INT
+		// 			) {
+		// 				$opc[opcode_count]->op1 = ;
+		// 			}
+		// 		break;
 
-				case '-':
-					$opc = (esteh_opcode **)realloc($opc, sizeof(esteh_opcode *) * (opcode_count + 1));
-					$opc[opcode_count]->lineno = line;
-					$opc[opcode_count]->code = TF_MIN;
-					opcode_count++;
-				break;
+		// 		case '-':
+		// 			$opc = (esteh_opcode **)realloc($opc, sizeof(esteh_opcode *) * (opcode_count + 1));
+		// 			$opc[opcode_count]->lineno = line;
+		// 			$opc[opcode_count]->code = TF_MIN;
+		// 			opcode_count++;
+		// 		break;
 
-				case '*':
-					$opc = (esteh_opcode **)realloc($opc, sizeof(esteh_opcode *) * (opcode_count + 1));
-					$opc[opcode_count]->lineno = line;
-					$opc[opcode_count]->code = TF_MUL;
-					opcode_count++;
-				break;
+		// 		case '*':
+		// 			$opc = (esteh_opcode **)realloc($opc, sizeof(esteh_opcode *) * (opcode_count + 1));
+		// 			$opc[opcode_count]->lineno = line;
+		// 			$opc[opcode_count]->code = TF_MUL;
+		// 			opcode_count++;
+		// 		break;
 
-				case '/':
-					$opc = (esteh_opcode **)realloc($opc, sizeof(esteh_opcode *) * (opcode_count + 1));
-					$opc[opcode_count]->lineno = line;
-					$opc[opcode_count]->code = TF_DIV;
-					opcode_count++;
-				break;
-			}
-		}
+		// 		case '/':
+		// 			$opc = (esteh_opcode **)realloc($opc, sizeof(esteh_opcode *) * (opcode_count + 1));
+		// 			$opc[opcode_count]->lineno = line;
+		// 			$opc[opcode_count]->code = TF_DIV;
+		// 			opcode_count++;
+		// 		break;
+		// 	}
+		// }
 
 		/**
 		 * Syntax must be cloesd with ';'.
