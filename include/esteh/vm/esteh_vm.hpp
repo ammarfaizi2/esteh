@@ -4,22 +4,26 @@
 
 #include <cstdio>
 #include <unistd.h>
+#include <stdint.h>
 #include <esteh/esteh_opt.hpp>
+#include <esteh/vm/opcode.hpp>
 
-class estehvm
+class esteh_vm
 {
 public:
-	estehvm(char *, int, esteh_opt **ss);
-	~estehvm();
+	esteh_vm(char *, int, esteh_opt **ss);
 	void run();
-	void init_file_streamer();
-	void parse_file(int);
-	int linter(char **);
+	void parse_file();
+	bool linter();
 private:
+	void execute_opcodes();
+	
 	int opt_count;
 	char *filename;
 	char *error_parse = nullptr;
 	esteh_opt **opts;
+	uint32_t opcode_count;
+	esteh_opcode **opcodes;
 };
 
 #endif

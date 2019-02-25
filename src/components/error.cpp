@@ -2,21 +2,19 @@
 #include <esteh/error.hpp>
 
 void _esteh_error(int exit_code, const char *msg, ...) {
-	fprintf(stderr, "Error: ");
+	fprintf(stdout, "Error: ");
 	va_list arg;
 	va_start(arg, msg);
-	vfprintf(stderr, msg, arg);
+	vfprintf(stdout, msg, arg);
 	va_end(arg);
-	fprintf(stderr, "\n");
-	exit(exit_code);
+	fprintf(stdout, "\n");
 }
 
 void esteh_error(const char *msg, ...) {
-	fprintf(stderr, "Error: ");
+	fprintf(stdout, "Error: ");
 	va_list arg;
 	va_start(arg, msg);
-	vfprintf(stderr, msg, arg);
+	vfprintf(stdout, msg, arg);
 	va_end(arg);
-	fprintf(stderr, "\n");
-	exit(1);
+	fprintf(stdout, "\n");
 }

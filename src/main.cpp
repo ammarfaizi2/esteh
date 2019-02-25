@@ -11,7 +11,7 @@
 #include <esteh/error.hpp>
 #include <esteh/usage.hpp>
 #include <esteh/esteh_opt.hpp>
-#include <esteh/vm/estehvm.hpp>
+#include <esteh/vm/esteh_vm.hpp>
 #include <esteh/argv_parser.hpp>
 
 int main(int argc, char *argv[])
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 	
 	// Scope isolation.
 	{
-		estehvm *st = new estehvm(filename, opt_count, opts);
+		esteh_vm *st = new esteh_vm(filename, opt_count, opts);
 		st->run();
 		delete st;
 		st = nullptr;

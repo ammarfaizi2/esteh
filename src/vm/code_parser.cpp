@@ -7,31 +7,19 @@
 #include <sys/types.h>
 #include <esteh/error.hpp>
 #include <esteh/vm/opcode.hpp>
-#include <esteh/vm/estehvm.hpp>
+#include <esteh/vm/esteh_vm.hpp>
 #include <esteh/vm/code_parser.hpp>
 
 #include "escape_char.hpp"
-#include "executors/esteh_print.hpp"
 
 #define ESTEH_DIR_OPCACHE "__teacache__"
 
-code_parser::code_parser() {
-}
-
-void code_parser::finish() {
-
-}
-
 int code_parser::is_ok() {
-	return 1;
+	return this->error_parse == nullptr;
 }
 
 char *code_parser::get_error() {
-	return nullptr;
-}
-
-size_t code_parser::get_error_length() {
-	return 0;
+	return this->error_parse;
 }
 
 void code_parser::set_file(char *filename) {
@@ -43,7 +31,7 @@ void code_parser::set_file(char *filename) {
 		exit(1);
 	}
 	this->filesize = st.st_size;
-	this->map = (char *)mmap(NULL, this->filesize, PROT_READ|PROT_WRITE, MAP_PRIVATE, this->file_fd, 0);
+	this->map = (char *)mmap(NULL, this->filesize, PROT_READ | PROT_WRITE, MAP_PRIVATE, this->file_fd, 0);
 }
 
 void code_parser::init_opcache_dir() {
@@ -58,52 +46,16 @@ void code_parser::init_opcache_dir() {
 
 }
 
-void code_parser::build_opcode() {
+uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 
 	this->init_opcache_dir();
-
-	esteh_opcode **opcodes = (esteh_opcode **)malloc(sizeof(esteh_opcode *));
-	uint32_t opcode_count = this->parse_file(&opcodes);
-	int skip = 0;	
-	
-	#ifdef ESTEH_DEBUG
-		if (this->error_parse != nullptr) {
-			printf("%s\n\n", this->error_parse);
-			exit(0);
-		}
-	#endif
-
-	// Run opcode.
-	for (uint32_t i = 0; i < opcode_count; ++i) {
-
-		if (skip) {
-			skip = 0;
-			continue;
-		}
-
-		switch (opcodes[i]->code) {
-			case TD_PRINT:
-				esteh_print(opcodes[i]->op1);
-			break;
-			default:
-
-			break;
-		}
-		free(opcodes[i]);
-		opcodes[i] = nullptr;
-	}
-	free(opcodes);
-	opcodes = nullptr;
-}
-
-uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 
 	#define $opc (*opcodes)
 	#define $rb this->map[i]
 
-	#define __er0 "Syntax Error: Unknown token \"%s\" in \"%s\" on line %d\n"
-	#define __er1 "Syntax Error: Unterminated operation in \"%s\" on line %d\n"
-	#define __er2 "Syntax Error: Unterminated string in \"%s\" on line %d\n"
+	#define __er0 "Syntax Error: Unknown token \"%s\" in \"%s\" on line %d"
+	#define __er1 "Syntax Error: Unterminated operation in \"%s\" on line %d"
+	#define __er2 "Syntax Error: Unterminated string in \"%s\" on line %d"
 
 	#define UNKNOWN_TOKEN \
 		this->error_parse = (char *)malloc( \
@@ -305,6 +257,11 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 	}
 
 	if (in_te) {
+		UNTERMINATED_OP
+		goto error_clean_up;
+	}
+
+	if (must_close) {
 		UNTERMINATED_OP
 		goto error_clean_up;
 	}

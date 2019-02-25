@@ -9,20 +9,15 @@
 class code_parser
 {
 public:
-	code_parser();
-	~code_parser();
-	void build_opcode();
-	void finish();
 	int is_ok();
-	size_t get_error_length();
 	char *get_error();
 	void set_file(char *);
-	void init_opcache_dir();
-private:
-	void buf_read();
-	int token_d(char *);
 	uint32_t parse_file(esteh_opcode ***);
+private:
+	int token_d(char *);
 	char escape_char(char);
+	void init_opcache_dir();
+
 	int file_fd;
 	size_t filesize;
 	char *map;
