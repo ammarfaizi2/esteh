@@ -4,6 +4,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <esteh/vm/esteh_types.hpp>
 
 typedef union _teavalue_value {
 	long long lval;  // For booleans and integers.
@@ -21,7 +22,7 @@ typedef struct _teaval {
 
 typedef struct _esteh_opcode {
 	void *handler;		// This is a function pointer that will be invoked to perform the operation of the given opcode.
-	uint16_t code;		// The opcode being executed.
+	uint16_t code: 10;	// The opcode being executed.
 	uint32_t lineno;	// The line number in the source code the opcode corresponds to.
 	teaval op1;
 	teaval op2;
@@ -30,22 +31,16 @@ typedef struct _esteh_opcode {
 } esteh_opcode;
 
 
-#define ESTEH_TYPE_NULL 	0b0001
-#define ESTEH_TYPE_STRING	0b0010
-#define ESTEH_TYPE_INT		0b0100
+#define T_UNKNOWN	0
 
-#define T_UNKNOWN 0
+#define TD_PRINT	20
 
-#define TC_NOTHING 100
+#define TE_STRING	30
+#define TE_INT		31
 
-#define TD_PRINT 200
-
-#define TE_STRING 300
-#define TE_INT 301
-
-#define TF_ADD 1 // +
-#define TF_MIN 2 // -
-#define TF_MUL 4 // *
-#define TF_DIV 8 // /
+#define TF_ADD		40
+#define TF_MIN		41
+#define TF_MUL		42
+#define TF_DIV		43
 
 #endif
