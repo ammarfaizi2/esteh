@@ -22,7 +22,7 @@ typedef struct _teaval {
 
 typedef struct _esteh_opcode {
 	void *handler;		// This is a function pointer that will be invoked to perform the operation of the given opcode.
-	uint16_t code: 10;	// The opcode being executed.
+	uint16_t code;		// The opcode being executed.
 	uint32_t lineno;	// The line number in the source code the opcode corresponds to.
 	teaval op1;
 	teaval op2;
