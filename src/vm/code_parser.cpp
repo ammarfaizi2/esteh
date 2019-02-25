@@ -208,7 +208,6 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 			$opc = (esteh_opcode **)realloc($opc, sizeof(esteh_opcode *) * (opcode_count + 1));
 			$opc[opcode_count] = (esteh_opcode *)malloc(sizeof(esteh_opcode));
 			$opc[opcode_count]->lineno = line;
-			$opc[opcode_count]->code = this->token_d(token);
 			if (($opc[opcode_count]->code = this->token_d(token)) == T_UNKNOWN) {
 				UNKNOWN_TOKEN
 			}
@@ -278,7 +277,7 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 		free(token);
 		token = nullptr;
 
-		// We don't need parsed opcodes since we won't run due to error.
+		// We don't need the parsed opcodes since we won't run due to error.
 		for (size_t i = 0; i < opcode_count; ++i) {
 			free($opc[i]);
 			$opc[i] = nullptr;

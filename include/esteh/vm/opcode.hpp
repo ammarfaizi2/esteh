@@ -34,7 +34,7 @@ typedef struct _esteh_opcode {
 #define ESTEH_TYPE_STRING	0b0010
 #define ESTEH_TYPE_INT		0b0100
 
-#define T_UNKNOWN -1
+#define T_UNKNOWN 0
 
 #define TC_NOTHING 100
 

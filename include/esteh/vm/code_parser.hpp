@@ -14,7 +14,7 @@ public:
 	void set_file(char *);
 	uint32_t parse_file(esteh_opcode ***);
 private:
-	int token_d(char *);
+	uint16_t token_d(char *);
 	char escape_char(char);
 	void init_opcache_dir();
 
