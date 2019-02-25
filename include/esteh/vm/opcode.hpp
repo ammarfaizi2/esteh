@@ -9,9 +9,9 @@
 typedef union _teavalue_value {
 	long long lval;  // For booleans and integers.
 	double dval;	 // For floating point numbers.
-	struct {		 // For strings
+	struct {		 // For strings.
 		char *val;
-		size_t len;
+		uint32_t len;
 	} str;
 } teavalue_value;
 
@@ -19,6 +19,12 @@ typedef struct _teaval {
 	teavalue_value value;
 	uint8_t type;
 } teaval;
+
+typedef struct _esteh_token {
+	uint16_t token;
+	uint32_t lineno;
+	teaval val;
+} esteh_token;
 
 typedef struct _esteh_opcode {
 	// void *handler;		// This is a function pointer that will be invoked to perform the operation of the given opcode.

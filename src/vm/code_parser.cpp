@@ -83,203 +83,107 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 	// Parser conditions.
 	bool in_te = false;
 	bool in_int = false;
-	bool in_dquo = false;
+	bool in_dquot = false;
 	bool in_comment_sl = false;
 	bool in_comment_ml = false;
 	bool must_close = false;
-	bool dquo_escaped = false;
+	bool dquot_escaped = false;
 	uint32_t line = 1;
+	uint32_t opcode_count = 0;
 
-	char *token = (char *)malloc(sizeof(char));
+	// First init.
+
+	#define TOKEN_ALLOC (sizeof(char) * 1000)
+	uint32_t cur_token_alloc = TOKEN_ALLOC;
+	char *token = (char *)malloc(TOKEN_ALLOC);
 	uint32_t token_size = 0;
 
-	uint32_t opcode_count;
+	#define TOKENS_ALLOC (sizeof(esteh_token *) * 1000)
+	uint32_t cur_tokens_alloc = TOKENS_ALLOC;
+	esteh_token **tokens = (esteh_token **)malloc(TOKENS_ALLOC);
+	uint32_t tokens_count = 0;
+
+	#define TOKEN_REALLOC \
+		if ((token_size + 2) >= cur_token_alloc) { \
+			cur_token_alloc = token_size + TOKEN_ALLOC + 2; \
+			token = (char *)realloc(token, cur_token_alloc); \
+		}
+
+	#define TOKENS_REALLOC \
+		if ((tokens_count + 2) >= cur_tokens_alloc) { \
+			cur_tokens_alloc = tokens_count + TOKENS_ALLOC + 2; \
+			tokens = (esteh_token **)realloc(tokens, cur_tokens_alloc); \
+		} \
+		tokens[tokens_count] = (esteh_token *)malloc(sizeof(esteh_token));
 
 	for (size_t i = 0; i < this->filesize; ++i) {
-
-
-		// if ((i > 0) && (!in_dquo) && (!in_te) && (!in_int)) {
-		// 	switch ($rb) {
-		// 		case '+':
-		// 			$opc = (esteh_opcode **)realloc($opc, sizeof(esteh_opcode *) * (opcode_count + 1));
-		// 			$opc[opcode_count]->lineno = line;
-		// 			$opc[opcode_count]->code = TF_ADD;
-		// 			opcode_count++;
-		// 			if (
-		// 				$opc[opcode_count - 1]->code == TD_PRINT &&
-		// 				$opc[opcode_count - 1]->op1.type == ESTEH_TYPE_INT
-		// 			) {
-		// 				$opc[opcode_count]->op1 = ;
-		// 			}
-		// 		break;
-
-		// 		case '-':
-		// 			$opc = (esteh_opcode **)realloc($opc, sizeof(esteh_opcode *) * (opcode_count + 1));
-		// 			$opc[opcode_count]->lineno = line;
-		// 			$opc[opcode_count]->code = TF_MIN;
-		// 			opcode_count++;
-		// 		break;
-
-		// 		case '*':
-		// 			$opc = (esteh_opcode **)realloc($opc, sizeof(esteh_opcode *) * (opcode_count + 1));
-		// 			$opc[opcode_count]->lineno = line;
-		// 			$opc[opcode_count]->code = TF_MUL;
-		// 			opcode_count++;
-		// 		break;
-
-		// 		case '/':
-		// 			$opc = (esteh_opcode **)realloc($opc, sizeof(esteh_opcode *) * (opcode_count + 1));
-		// 			$opc[opcode_count]->lineno = line;
-		// 			$opc[opcode_count]->code = TF_DIV;
-		// 			opcode_count++;
-		// 		break;
-		// 	}
-		// }
-
-		/**
-		 * Syntax must be cloesd with ';'.
-		 */
-		if (must_close) {
-			if ($rb != '\t' && $rb != ' ' && $rb != '\n' && $rb != ';') {
-				UNTERMINATED_OP	
-			} else if ($rb == ';') {
-				must_close = false;
-				continue;
-			}
-			CLEAND;
+		
+		if ($rb == '\n') {
+			line++;
 		}
 
 		/**
-		 * Single line comment.
+		 * String with double quotes terminator.
 		 */
-		if (in_comment_sl) {
-			while ($rb != '\n' && (i < this->filesize)) i++;
-			in_comment_sl = false;
-		} else {
-			if ((!in_dquo) && $rb == '/' && this->map[i + 1] == '/') {
-				in_comment_sl = true;
-				i++;
-				continue;
-			}
-		}		
-
-		/**
-		 * Multi Line Comment.
-		 */
-		if (in_comment_ml) {
-			while ($rb != '*' && this->map[i + 1] != '/' && (i < this->filesize)) i++;
-			in_comment_ml = false;
-		} else {
-			if ((!in_dquo) && $rb == '/' && this->map[i + 1] == '*') {
-				in_comment_ml = true;
-				i++;
-				continue;
-			}
-		}
-
 		if ($rb == '"') {
 			
-			if (in_dquo) {
-
-				if (dquo_escaped) {
-					$rb = this->escape_char($rb);
-					dquo_escaped = 0;
-					token = (char *)realloc(token, token_size + 2);
-					token[token_size] = $rb;
-					token_size++;
-					CLEAND;
-				}
-
-				// End of a string.
-				$opc[opcode_count - 1]->op1.type = ESTEH_TYPE_STRING;
-				$opc[opcode_count - 1]->op1.value.str.len = sizeof(char) * (token_size + 1);
-				$opc[opcode_count - 1]->op1.value.str.val = (char *)malloc($opc[opcode_count - 1]->op1.value.str.len);
-				memcpy($opc[opcode_count - 1]->op1.value.str.val, token, $opc[opcode_count - 1]->op1.value.str.len);
-				in_dquo = 0;
-				token_size = 0;
-				must_close = true;
-			} else {
-				// Start of a string.
-				in_dquo = 1;
-			}
-			CLEAND;
-
-		} else if (in_dquo) {
-
-			if (dquo_escaped) {
-				$rb = this->escape_char($rb);
-				dquo_escaped = false;
-			} else if ($rb == '\\') {
-				dquo_escaped = 1;
-				CLEAND;
+			if (!in_dquot) {
+				in_dquot = 1;
+				continue;
 			}
 
-			token = (char *)realloc(token, token_size + 2);
-			token[token_size] = $rb;
-			token_size++;
-			CLEAND;
-		}
+			if (dquot_escaped && $rb == '"') {
 
-		if (
-			(!in_dquo) &&
-			(($rb >= 65 && $rb <= 90) ||
-			($rb >= 97 && $rb <= 122) ||
-			($rb == 95))
-		) {
-			if (!in_te) {
-				in_te = 1;
-			}
-			token = (char *)realloc(token, token_size + 2);
-			token[token_size] = $rb;
-			token_size++;
-			CLEAND;
-		} else if (in_te) {
+				TOKEN_REALLOC
 
-			if ($rb >= 48 && $rb <= 57) {
-				token = (char *)realloc(token, token_size + 2);
 				token[token_size] = $rb;
 				token_size++;
 				continue;
 			}
 
-			// Got an opcode.
-			token[token_size] = '\0';
-			$opc = (esteh_opcode **)realloc($opc, sizeof(esteh_opcode *) * (opcode_count + 1));
-			$opc[opcode_count] = (esteh_opcode *)malloc(sizeof(esteh_opcode));
-			$opc[opcode_count]->lineno = line;
-			if (($opc[opcode_count]->code = this->token_d(token)) == T_UNKNOWN) {
-				UNKNOWN_TOKEN
-			}
-			opcode_count++;
-			in_te = false;
-			token_size = 0;
-		}
+			TOKENS_REALLOC
 
-		if (
-			(!in_dquo) && (!in_te) &&
-			($rb >= 48 && $rb <= 57)
-		) {
-			if (!in_int) {
-				in_int = true;
+			token[token_size] = '\0';
+
+			tokens[tokens_count]->lineno = line;
+			tokens[tokens_count]->token  = TE_STRING;
+			tokens[tokens_count]->val.type = ESTEH_TYPE_STRING;
+			tokens[tokens_count]->val.value.str.len = token_size;
+			tokens[tokens_count]->val.value.str.val = (char*)malloc(token_size);
+			memcpy(
+				tokens[tokens_count]->val.value.str.val,
+				token,
+				token_size
+			);
+
+			break;
+			in_dquot = 0;
+			token_size = 0;
+			tokens_count++;
+			continue;
+		} else if (in_dquot) {
+
+			TOKEN_REALLOC;
+
+			if ($rb == '\\') {
+				dquot_escaped = true;
+				continue;
 			}
-			token = (char *)realloc(token, token_size + 2);
+
+			if (dquot_escaped) {
+				$rb = this->escape_char($rb);
+			}
+
 			token[token_size] = $rb;
 			token_size++;
-			CLEAND;
-		} else if (in_int) {
-			// Got an integer.
-
+			continue;
 		}
+		// End of string with double quotes terminator.
 
-		cleand:		
-		if ($rb == 10) {
-			line++;
-		}
+
 	}
 
-	line--;
-
-	if (in_dquo) {
+	if (in_dquot) {
 		UNTERMINATED_STRING
 		goto error_clean_up;
 	}
