@@ -6,7 +6,7 @@
 	// Debug only.
 	//
 	// 1 = On, 0 = Off
-	#if 1
+	#if 0
 
 		#define ESTEH_DEBUG
 
