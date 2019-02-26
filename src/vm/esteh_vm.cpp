@@ -73,10 +73,15 @@ void esteh_vm::execute_opcodes() {
 
 		switch ($opx->code) {
 			case TD_PRINT:
-				esteh_print($opx->op1);
+				switch ($opx->op1_type) {
+					case static_value:
+						esteh_print($opx->op1.static_value);
+					break;
+				}
 			break;
 
 			default:
+				printf("%d\n", $opx->code);
 				esteh_error("Unknown opcode in \"%s\" on line \"%d\"", this->filename, $opx->lineno);
 				exit(1);
 			break;

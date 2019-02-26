@@ -56,8 +56,9 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 	#define __er0 "Syntax Error: Unknown token \"%s\" in \"%s\" on line %d"
 	#define __er1 "Syntax Error: Unterminated operation in \"%s\" on line %d"
 	#define __er2 "Syntax Error: Unterminated string in \"%s\" on line %d"
+	#define __er3 "Syntax Error: Token \"%s\" must has an operand in \"%s\" on line %d"
 
-	#define UNKNOWN_TOKEN \
+	#define UNKNOWN_TOKEN(token) \
 		this->error_parse = (char *)malloc( \
 			sizeof(char) * (sizeof(__er0) + strlen(token) + (floor(log10(line)) + 1) + strlen(this->filename)) \
 		); \
@@ -78,6 +79,14 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 		sprintf(this->error_parse, __er2, this->filename, line); \
 		goto error_clean_up;
 
+	#define TOKEN_DOES_NOT_HAVE_AN_OPERAND(TOKEN_CODE) \
+		const char *token_name = get_token_name(TOKEN_CODE); \
+		this->error_parse = (char *)malloc( \
+			sizeof(char) * (sizeof(__er3) + strlen(token_name) + (floor(log10(line)) + 1) + strlen(this->filename)) \
+		); \
+		sprintf(this->error_parse, __er3, token_name, this->filename, line); \
+		goto error_clean_up;
+
 	#define CLEAND goto cleand
 
 	// Parser conditions.
@@ -85,9 +94,11 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 	bool in_dquot = false;
 	bool dquot_escaped = false;
 	bool must_be_closed = false;
+	bool must_have_operand = false;
 	bool allow_operation = false;
+	bool opcode_must_has_operand = false;
+	bool in_an_operand = false;
 	uint32_t line = 1;
-	uint32_t opcode_count = 0;
 
 	// First init.
 
@@ -100,6 +111,12 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 	uint32_t cur_tokens_alloc = TOKENS_ALLOC;
 	esteh_token **tokens = (esteh_token **)malloc(TOKENS_ALLOC);
 	uint32_t tokens_count = 0;
+	uint32_t opcode_offset = 0;
+
+	#define OPCODES_ALLOC sizeof(esteh_opcode *) * 1;
+	uint32_t cur_opcodes_alloc = OPCODES_ALLOC;
+	uint32_t opcode_count = 0;
+	*opcodes = (esteh_opcode **)malloc(cur_opcodes_alloc);
 
 	#define TOKEN_REALLOC \
 		if ((token_size + 2) >= cur_token_alloc) { \
@@ -108,8 +125,8 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 		}
 
 	#define TOKENS_REALLOC \
-		if ((tokens_count + 2) >= cur_tokens_alloc) { \
-			cur_tokens_alloc = tokens_count + TOKENS_ALLOC + 2; \
+		if ( ((tokens_count + 2) * sizeof(esteh_token *)) >= cur_tokens_alloc) { \
+			cur_tokens_alloc = ((tokens_count + 2) * sizeof(esteh_token *)) + TOKEN_ALLOC; \
 			tokens = (esteh_token **)realloc(tokens, cur_tokens_alloc); \
 		} \
 		tokens[tokens_count] = (esteh_token *)malloc(sizeof(esteh_token));
@@ -120,14 +137,54 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 			line++;
 		}
 
+		/**
+		 * If not in a double quotes.
+		 */
 		if (!in_dquot) {
+
+
+			/**
+			 * The syntax must be closed with semicolon.
+			 */
+			if ($rb == ';') {
+
+				if (must_have_operand) {
+					// Parse error.
+					TOKEN_DOES_NOT_HAVE_AN_OPERAND(tokens[tokens_count - 1]->token)
+				}
+
+				if (in_an_operand) {
+					this->build_opcode(
+						opcode_offset,
+						tokens_count,
+						&opcode_count,
+						&cur_opcodes_alloc,
+						opcode_must_has_operand,
+						tokens,
+						&opcodes
+					);
+					in_an_operand = false;
+				}
+
+				must_be_closed = false;
+				continue;
+			}
+
 			/**
 			 * Multi line comment.
 			 */
 			if ($rb == '/' && this->map[i + 1] == '*') {
 				i += 2;
-				while (((i - 1) < this->filesize) && (!($rb == '*' && this->map[i + 1] == '/'))) i++;
+				while (((i - 1) < this->filesize) && (!($rb == '*' && this->map[i + 1] == '/'))) {
+					i++;
+					if ($rb == '\n') {
+						line++;
+					}
+				}
 				i++;
+				if ($rb == '\n') {
+					line++;
+				}
 				continue;
 			}
 
@@ -137,6 +194,7 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 			if ($rb == '/' && this->map[i + 1] == '/') {
 				i += 2;
 				while ((i < this->filesize) && $rb != '\n') i++;
+				line++;
 				continue;
 			}
 		}
@@ -148,7 +206,8 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 
 			if (!in_dquot) {
 
-				if (must_be_closed) {
+				if (must_be_closed && (!must_have_operand)) {
+					// Parse error.
 					UNTERMINATED_OP
 				}
 
@@ -189,6 +248,7 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 			token_size = 0;
 			must_be_closed = true;
 			allow_operation = true;
+			must_have_operand = false;
 			tokens_count++;
 			continue;
 			// End's end of string.
@@ -210,7 +270,7 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 		} else // End of string with double quotes terminator.
 		
 		/**
-		 * TE tokens.
+		 * TE tokens, such as echo, print, etc.
 		 */
 		if (
 			($rb >= 'A' && $rb <= 'Z') ||
@@ -238,16 +298,30 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 			}
 
 			TOKENS_REALLOC
-
+			token[token_size] = '\0';
 			tokens[tokens_count]->lineno = line;
-			tokens[tokens_count]->token  = this->token_d(token);
+			tokens[tokens_count]->token  = this->token_d(token, &must_be_closed, &must_have_operand);
+			tokens[tokens_count]->val.type = T_NOT_A_DATA;
+			opcode_offset = tokens_count;
+			opcode_must_has_operand = must_have_operand;
+			in_an_operand = true;
+
+			if (tokens[tokens_count]->token == T_UNKNOWN) {
+				UNKNOWN_TOKEN(token)
+			}
+
+			if (must_have_operand) {
+				if (this->map[i - 1] == ';') {
+					// Parse error.
+					TOKEN_DOES_NOT_HAVE_AN_OPERAND(tokens[tokens_count]->token)
+				}
+			}
 
 			in_te = false;
 			token_size = 0;
+			tokens_count++;
 			continue;
 		}
-
-
 	}
 
 	free(token);
