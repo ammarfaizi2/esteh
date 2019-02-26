@@ -161,7 +161,7 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 						&cur_opcodes_alloc,
 						opcode_must_has_operand,
 						tokens,
-						&opcodes
+						opcodes
 					);
 					in_an_operand = false;
 				}

@@ -18,7 +18,7 @@ private:
 	uint16_t token_d(char *, bool *, bool *);
 	char escape_char(char);
 	void init_opcache_dir();
-	void build_opcode(uint32_t, uint32_t, uint32_t *, uint32_t *, bool, esteh_token **, esteh_opcode ****);
+	void build_opcode(uint32_t, uint32_t, uint32_t *, uint32_t *, bool, esteh_token **, esteh_opcode ***);
 
 	int file_fd;
 	size_t filesize;
