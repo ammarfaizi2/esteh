@@ -4,6 +4,6 @@ Test single line and multiline comment.
 // This is a test
 // p "123\n"
 // print "Hello World\n"
-print "Es Teh Memang Menyegarkan"
+print "Es Teh Memang Menyegarkan";
 --EXPECT--
 Es Teh Memang Menyegarkan

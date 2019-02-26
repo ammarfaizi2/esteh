@@ -9,9 +9,9 @@
 typedef union _teavalue_value {
 	long long lval;  // For booleans and integers.
 	double dval;	 // For floating point numbers.
-	struct {		 // For strings
+	struct {		 // For strings.
 		char *val;
-		size_t len;
+		uint32_t len;
 	} str;
 } teavalue_value;
 
@@ -20,16 +20,44 @@ typedef struct _teaval {
 	uint8_t type;
 } teaval;
 
-typedef struct _esteh_opcode {
-	// void *handler;		// This is a function pointer that will be invoked to perform the operation of the given opcode.
-	uint16_t code;		// The opcode being executed.
-	uint32_t lineno;	// The line number in the source code the opcode corresponds to.
-	teaval op1;
-	teaval op2;
-	teaval result;
-} esteh_opcode;
+typedef struct _esteh_token {
+	uint16_t token;
+	uint32_t lineno;
+	teaval val;
+} esteh_token;
 
-#define T_UNKNOWN	0
+typedef enum _openum {
+	opcode_1,
+	opcode_2,
+	static_value,
+	// variable // TODO: Next time.
+} openum;
+
+typedef struct _esteh_opcode esteh_opcode;
+
+typedef union _teavald {
+	esteh_opcode *opcode_1;
+	esteh_opcode *opcode_2;
+	teaval static_value;
+
+	// teavar variable; // TODO: Next time.
+} teavald;
+
+struct _esteh_opcode {
+	void *handler;			// This is a function pointer that will be invoked to perform the operation of the given opcode.
+	uint16_t code;			// The opcode being executed.
+	uint32_t lineno;		// The line number in the source code the opcode corresponds to.
+	teavald op1;
+	teavald op2;
+	teavald result;
+	openum op1_type;
+	openum op2_type;
+	openum result_type;
+};
+
+
+#define T_UNKNOWN		0
+#define T_NOT_A_DATA	0
 
 #define TD_PRINT	20
 
