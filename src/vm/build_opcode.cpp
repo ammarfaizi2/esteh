@@ -19,27 +19,67 @@ void code_parser::build_opcode(
 	esteh_token **tokens,
 	esteh_opcode ***opcodes
 ) {
+	
+	_OPCODES_REALLOC
+
 	switch (tokens[opcode_offset]->token) {
 		case TD_PRINT:
 			(*opcodes)[*opcode_count] = (esteh_opcode *)malloc(sizeof(esteh_opcode));
 			(*opcodes)[*opcode_count]->code = TD_PRINT;
 			(*opcodes)[*opcode_count]->lineno = tokens[opcode_offset]->lineno;
 			uint32_t i = opcode_offset + 1;
-			// while (i < tokens_count) {
+			bool skip = false;
+
+			while (i < tokens_count) {
+				if (skip) {
+					i++;
+					skip = false;
+					continue;
+				}
 				switch (tokens[i]->token) {
+
 					case TE_STRING:
 					case TE_INT:
-
-						_OPCODES_REALLOC
-
 						(*opcodes)[*opcode_count]->op1.static_value.value = tokens[i]->val.value;
 						(*opcodes)[*opcode_count]->op1.static_value.type = tokens[i]->val.type;
 						(*opcodes)[*opcode_count]->op1_type = static_value;
-						(*opcode_count)++;
+					break;
+
+					case TF_ADD:
+					case TF_MIN:
+					case TF_MUL:
+					case TF_DIV:
+						skip = true;
+						(*opcodes)[*opcode_count]->op1_type = opcode_1;
+						(*opcodes)[*opcode_count]->op1.opcode_1 = (esteh_opcode *)malloc(sizeof(esteh_opcode));
+						(*opcodes)[*opcode_count]->op1.opcode_1->code = tokens[i]->token;
+						if (i < 2 && (tokens_count <= (i + 1))) {
+							// Error parse.
+						} else {
+
+							if (tokens[i - 1]->token == TE_INT) {
+								(*opcodes)[*opcode_count]->op1.opcode_1->op1.static_value.value = tokens[i - 1]->val.value;
+								(*opcodes)[*opcode_count]->op1.opcode_1->op1.static_value.type = ESTEH_TYPE_INT;
+							} else {
+								// Must be variable or error parse.
+							}
+
+							if (tokens[i - 1]->token == TE_INT) {
+								(*opcodes)[*opcode_count]->op1.opcode_1->op2.static_value.value = tokens[i + 1]->val.value;
+								(*opcodes)[*opcode_count]->op1.opcode_1->op2.static_value.type = ESTEH_TYPE_INT;
+							} else {
+								// Must be variable or error parse.
+							}
+							(*opcodes)[*opcode_count]->op1.opcode_1->result_type = static_value;
+							(*opcodes)[*opcode_count]->op1.opcode_1->result.static_value.type = ESTEH_TYPE_INT;
+						}
+						
 					break;
 				}
 				i++;
-			// }
+			}
+
+			(*opcode_count)++;
 		break;
 	}
 

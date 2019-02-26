@@ -74,7 +74,44 @@ void esteh_vm::execute_opcodes() {
 		switch ($opx->code) {
 			case TD_PRINT:
 				switch ($opx->op1_type) {
-					case static_value:
+					case static_value:						
+						esteh_print($opx->op1.static_value);
+					break;
+					case opcode_1:
+
+						long long result = 0;
+						uint8_t result_type = $opx->op1.opcode_1->result.static_value.type;
+
+						switch ($opx->op1.opcode_1->code) {
+							case TF_ADD:
+								result = (
+									$opx->op1.opcode_1->op1.static_value.value.lval + 
+									$opx->op1.opcode_1->op2.static_value.value.lval
+								);
+							break;
+							case TF_MIN:
+								result = (
+									$opx->op1.opcode_1->op1.static_value.value.lval - 
+									$opx->op1.opcode_1->op2.static_value.value.lval
+								);
+							break;
+
+							case TF_MUL:
+								result = (
+									$opx->op1.opcode_1->op1.static_value.value.lval * 
+									$opx->op1.opcode_1->op2.static_value.value.lval
+								);
+							break;
+
+							case TF_DIV:
+								result = (
+									$opx->op1.opcode_1->op1.static_value.value.lval /
+									$opx->op1.opcode_1->op2.static_value.value.lval
+								);
+							break;
+						}
+						$opx->op1.static_value.value.lval = result;
+						$opx->op1.static_value.type = result_type;						
 						esteh_print($opx->op1.static_value);
 					break;
 				}

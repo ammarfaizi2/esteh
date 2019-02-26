@@ -10,6 +10,7 @@
 #include <esteh/vm/esteh_vm.hpp>
 #include <esteh/vm/code_parser.hpp>
 
+
 #include "escape_char.hpp"
 
 #define ESTEH_DIR_OPCACHE "__teacache__"
@@ -95,9 +96,11 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 	bool dquot_escaped = false;
 	bool must_be_closed = false;
 	bool must_have_operand = false;
+	bool maybe_have_operand = false;
 	bool allow_operation = false;
 	bool opcode_must_has_operand = false;
 	bool in_an_operand = false;
+	bool in_int = false;
 	uint32_t line = 1;
 
 	// First init.
@@ -132,7 +135,8 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 		tokens[tokens_count] = (esteh_token *)malloc(sizeof(esteh_token));
 
 	for (size_t i = 0; i < this->filesize; ++i) {
-		
+
+start_loop:
 		if ($rb == '\n') {
 			line++;
 		}
@@ -140,8 +144,7 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 		/**
 		 * If not in a double quotes.
 		 */
-		if (!in_dquot) {
-
+		if (!(in_dquot || in_int)) {
 
 			/**
 			 * The syntax must be closed with semicolon.
@@ -176,10 +179,10 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 			if ($rb == '/' && this->map[i + 1] == '*') {
 				i += 2;
 				while (((i - 1) < this->filesize) && (!($rb == '*' && this->map[i + 1] == '/'))) {
-					i++;
 					if ($rb == '\n') {
 						line++;
 					}
+					i++;
 				}
 				i++;
 				if ($rb == '\n') {
@@ -211,7 +214,7 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 					UNTERMINATED_OP
 				}
 
-				in_dquot = 1;
+				in_dquot = true;
 				continue;
 			}
 
@@ -287,6 +290,7 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 			token[token_size] = $rb;
 			token_size++;
 			continue;
+
 		} else if (in_te) {
 			if ($rb >= '0' && $rb <= '9') {
 
@@ -321,7 +325,97 @@ uint32_t code_parser::parse_file(esteh_opcode ***opcodes) {
 			token_size = 0;
 			tokens_count++;
 			continue;
+		} else if (
+			$rb >= '0' && $rb <= '9'
+		) {
+
+			if (!in_int) {
+				if (must_be_closed && (!must_have_operand)) {
+					// Parse error.
+					UNTERMINATED_OP
+				}
+
+				in_int = true;
+			}
+
+			TOKEN_REALLOC
+
+			token[token_size] = $rb;
+			token_size++;
+
+		} else if (in_int) {
+			/**
+			 * End of int.
+			 */
+			TOKENS_REALLOC
+
+			token[token_size] = '\0';
+			tokens[tokens_count]->lineno = line;
+			tokens[tokens_count]->token  = TE_INT;
+			tokens[tokens_count]->val.type = ESTEH_TYPE_INT;
+			tokens[tokens_count]->val.value.lval = atoll(token);
+
+			in_int = false;
+			must_be_closed = true;
+			allow_operation = true;
+			must_have_operand = false;
+			maybe_have_operand = true;
+			tokens_count++;
+			token_size = 0;
+			goto start_loop;
+
+		} else if ($rb == '+') {
+
+			TOKENS_REALLOC
+
+			token[token_size] = '\0';
+			tokens[tokens_count]->lineno = line;
+			tokens[tokens_count]->token  = TF_ADD;
+
+			must_have_operand = true;
+			token_size = 0;
+			tokens_count++;
+
+		} else if ($rb == '-') {
+
+			TOKENS_REALLOC
+
+			token[token_size] = '\0';
+			tokens[tokens_count]->lineno = line;
+			tokens[tokens_count]->token  = TF_MIN;
+
+			must_have_operand = true;
+			token_size = 0;
+			tokens_count++;
+
+		} else if ($rb == '*') {
+
+			TOKENS_REALLOC
+
+			token[token_size] = '\0';
+			tokens[tokens_count]->lineno = line;
+			tokens[tokens_count]->token  = TF_MUL;
+
+			must_have_operand = true;
+			token_size = 0;
+			tokens_count++;
+		} else if ($rb == '/') {
+
+			TOKENS_REALLOC
+
+			token[token_size] = '\0';
+			tokens[tokens_count]->lineno = line;
+			tokens[tokens_count]->token  = TF_DIV;
+
+			must_have_operand = true;
+			token_size = 0;
+			tokens_count++;
 		}
+	}
+
+	if (must_be_closed) {
+		// Parse error.
+		UNTERMINATED_OP
 	}
 
 	free(token);

@@ -13,6 +13,7 @@
 #include <esteh/esteh_opt.hpp>
 #include <esteh/vm/esteh_vm.hpp>
 #include <esteh/argv_parser.hpp>
+#include <esteh/vm/esteh_buffer.hpp>
 
 int main(int argc, char *argv[])
 {
@@ -71,6 +72,8 @@ int main(int argc, char *argv[])
 	// ...
 	// ...
 	// ...
+
+	buffer_shutdown(1);
 
 	// end esteh shutdown.
 

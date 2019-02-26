@@ -26,6 +26,14 @@ const char *get_token_name(uint16_t tkn) {
 
 	switch (tkn) {
 		rq(TD_PRINT, "TD_PRINT");
+
+		rq(TE_INT, "TF_INT");
+		rq(TE_STRING, "TF_STRING");
+
+		rq(TF_ADD, "TF_ADD");
+		rq(TF_MIN, "TF_MIN");
+		rq(TF_MUL, "TF_MUL");
+		rq(TF_DIV, "TF_DIV");
 	}
 
 	return "";
