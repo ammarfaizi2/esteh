@@ -78,3 +78,4 @@ foreach (glob(__DIR__."/tests/basic/*.teat") as $file) {
 
 
 printf("\n\nTests Passed! OK\n");
+exit(0);
