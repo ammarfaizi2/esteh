@@ -4,7 +4,8 @@ LINKER = g++
 DEBUG_MODE = 1
 
 ROOT_DIR = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-TARGET_BIN = ${ROOT_DIR}/esteh
+BIN_NAME = esteh
+TARGET_BIN = ${ROOT_DIR}/${BIN_NAME}
 INC = -I${ROOT_DIR}/include
 SRC = ${ROOT_DIR}/src
 
@@ -36,7 +37,7 @@ ${OBJECTS}:
 	${COMPILER} ${COMPILER_FLAGS} ${@:%.o=%} -o $@
 
 install:
-	${CP} ${TARGET_BIN} /usr/bin/${TARGET_BIN}
+	${CP} ${TARGET_BIN} /usr/bin/${BIN_NAME}
 
 test:
 	php ${ROOT_DIR}/run_test.php
