@@ -10,7 +10,6 @@
 #include <esteh/vm/esteh_vm.hpp>
 #include <esteh/vm/code_parser.hpp>
 
-
 #include "escape_char.hpp"
 
 #define ESTEH_DIR_OPCACHE "__teacache__"
