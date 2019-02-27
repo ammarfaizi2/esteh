@@ -13,7 +13,7 @@
 
 #define _berr_0 "Invalid syntax in \"%s\" on line %d"
 #define INVALID_SYNTAX \
-	this->error_parse = (char *)malloc( \ 
+	this->error_parse = (char *)malloc( \
 		sizeof(_berr_0) + strlen(this->filename) + (floor(log10((tokens[i]->lineno)) + 1) + 1) \
 	); \
 	sprintf(this->error_parse, _berr_0, this->filename, tokens[i]->lineno);
