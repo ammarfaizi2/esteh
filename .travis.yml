@@ -1,0 +1,28 @@
+
+language: cpp
+os: linux
+dist: xenial
+sudo: required
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-7
+
+cache:
+    apt: true
+
+install:
+  - make -j2
+
+script:
+  - make test
+
+notifications:
+  email:
+    recipients:
+      - ammarfaizi2@gmail.com
+    on_success: change
+    on_failure: always
