@@ -157,7 +157,7 @@ start_loop:
 				}
 
 				if (in_an_operand) {
-					this->build_opcode(
+					if (!this->build_opcode(
 						opcode_offset,
 						tokens_count,
 						&opcode_count,
@@ -165,7 +165,9 @@ start_loop:
 						opcode_must_has_operand,
 						tokens,
 						opcodes
-					);
+					)) {
+						goto error_clean_up;
+					}
 					in_an_operand = false;
 				}
 
@@ -282,7 +284,7 @@ start_loop:
 		) {
 			
 			if (!in_te) {
-				in_te = true;	
+				in_te = true;
 			}
 
 			TOKEN_REALLOC
@@ -326,7 +328,7 @@ start_loop:
 			tokens_count++;
 			continue;
 		} else if (
-			$rb >= '0' && $rb <= '9'
+			($rb >= '0' && $rb <= '9')
 		) {
 
 			if (!in_int) {
@@ -418,10 +420,14 @@ start_loop:
 		UNTERMINATED_OP
 	}
 
+	printf("%d\n", (*opcodes)[5]->op1.static_value.value.lval);
+	
 	free(token);
 	token = nullptr;
+
 	free(tokens);
 	tokens = nullptr;
+
 	munmap(this->map, this->filesize);
 	this->map = nullptr;
 	close(this->file_fd);
@@ -431,6 +437,9 @@ start_loop:
 	error_clean_up:
 		free(token);
 		token = nullptr;
+
+		free(tokens);
+		tokens = nullptr;
 
 		// We don't need the parsed opcodes since we won't run due to error.
 		for (size_t i = 0; i < opcode_count; ++i) {
