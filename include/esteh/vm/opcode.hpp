@@ -7,7 +7,7 @@
 #include <esteh/vm/esteh_types.hpp>
 
 typedef union _teavalue_value {
-	long long lval;  // For booleans and integers.
+	int64_t lval;	 // For booleans and integers.
 	double dval;	 // For floating point numbers.
 	struct {		 // For strings.
 		char *val;

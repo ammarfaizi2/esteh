@@ -420,6 +420,8 @@ start_loop:
 
 	free(token);
 	token = nullptr;
+	free(tokens);
+	tokens = nullptr;
 	munmap(this->map, this->filesize);
 	this->map = nullptr;
 	close(this->file_fd);

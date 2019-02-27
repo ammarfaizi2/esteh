@@ -13,8 +13,7 @@
 size_t allocated_buf = 0;
 char *__esteh_buffer = (char *)malloc(ESTEH_BUFFER_SIZE + 2);
 
-void esteh_buffer_add(char *str, size_t len, uint8_t _fd = 1) {
-
+void esteh_buffer_add(char *str, size_t len, uint8_t _fd = 1) {	
 	if (allocated_buf < ESTEH_BUFFER_SIZE) {
 
 		for (size_t k = 0; (allocated_buf <= ESTEH_BUFFER_SIZE) && (k < len);) {
