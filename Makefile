@@ -30,10 +30,13 @@ OBJECTS = $(SOURCES:%.cpp=%.cpp.o)
 all: ${OBJECTS} ${TARGET_BIN}
 
 ${TARGET_BIN}: ${OBJECTS}
-		${LINKER} ${LINKER_FLAGS} -o ${TARGET_BIN} ${OBJECTS}
+	${LINKER} ${LINKER_FLAGS} -o ${TARGET_BIN} ${OBJECTS}
 
 ${OBJECTS}:
-		${COMPILER} ${COMPILER_FLAGS} ${@:%.o=%} -o $@
+	${COMPILER} ${COMPILER_FLAGS} ${@:%.o=%} -o $@
+
+install:
+	${CP} ${TARGET_BIN} /usr/bin/${TARGET_BIN}
 
 test:
 	php ${ROOT_DIR}/run_test.php

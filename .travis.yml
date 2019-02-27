@@ -10,12 +10,14 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - g++-7
+      - php7.2
 
 cache:
     apt: true
 
 install:
   - make -j2
+  - sudo make install
 
 script:
   - make test
