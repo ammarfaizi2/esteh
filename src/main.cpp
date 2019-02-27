@@ -43,9 +43,22 @@ int main(int argc, char *argv[])
 		st = nullptr;
 	}
 
+
 	{
 		esteh_vm *st = new esteh_vm(filename, opts);
+		st->run();
+
+		delete st;
+		st = nullptr;
 	}
+
+	// Run EsTeh shutdown here...
+
+	// ...
+	// ...
+	// ...
+
+	// End.
 
 	return 0;
 }

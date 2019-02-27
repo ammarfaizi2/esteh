@@ -18,7 +18,7 @@ void argv_parser::run(char **filename) {
 
 	bool got_filename = false;
 
-	for (int i = 0; i < this->argc; ++i) {
+	for (int i = 1; i < this->argc; ++i) {
 		if (this->skip) {
 			this->skip = false;
 			continue;

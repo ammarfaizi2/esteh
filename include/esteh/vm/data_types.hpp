@@ -1,0 +1,7 @@
+
+#ifndef ESTEH_VM_DATA_TYPES_HPP
+#define ESTEH_VM_DATA_TYPES_HPP
+
+
+
+#endif

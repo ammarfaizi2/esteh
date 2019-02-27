@@ -11,7 +11,6 @@ public:
 	esteh_vm(char *filename, opt_struct **opts);
 	void run();
 private:
-	void open_file();
 	void lexical_analyzer();
 	char *filename;
 	opt_struct **opts;
