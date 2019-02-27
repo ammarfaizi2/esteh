@@ -419,8 +419,6 @@ start_loop:
 		// Parse error.
 		UNTERMINATED_OP
 	}
-
-	printf("%d\n", (*opcodes)[5]->op1.static_value.value.lval);
 	
 	free(token);
 	token = nullptr;
