@@ -6,30 +6,25 @@
 #include <esteh/version.hpp>
 #include <esteh/argv_parser/argv_parser.hpp>
 
-argv_parser::argv_parser(int argc, char **argv) {
+argv_parser::argv_parser(int argc, char **argv, opt_struct ***opts) {
 	this->argc = argc;
-	this->argv = argv;	
+	this->argv = argv;
+	this->opts = opts;
 }
 
-void argv_parser::run(opt_struct ***opts) {
-	this->parse();
-}
-
-void argv_parser::parse() {
+void argv_parser::run(char **filename) {
 
 	#define $argv this->argv[i]
 
-	for (int i = 0; i < this->argc; ++i) {
+	bool got_filename = false;
 
+	for (int i = 0; i < this->argc; ++i) {
 		if (this->skip) {
 			this->skip = false;
 			continue;
 		}
-
 		size_t len = strlen($argv);
-
 		if (len == 0) continue;
-
 		if ($argv[0] == '-') {
 			if (len == 1) {
 				this->error = strdup("Invalid option \"-\"");
@@ -44,11 +39,16 @@ void argv_parser::parse() {
 				if (this->opt1($argv+1)) {
 					return;
 				}
-			} else {
-				if (this->opt2($argv+2)) {
-					return;
-				}
+			} else if (this->opt2($argv+2)) {
+				return;
 			}
+		}
+
+		if (!got_filename) {
+			(*filename) = (char *)malloc(len + 1);
+			memcpy(*filename, $argv, len);
+			(*filename)[len] = '\0';
+			got_filename = true;
 		}
 	}
 

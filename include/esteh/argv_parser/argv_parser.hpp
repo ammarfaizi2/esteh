@@ -7,10 +7,10 @@
 class argv_parser 
 {
 public:
-	argv_parser(int argc, char **argv);
+	argv_parser(int argc, char **argv, opt_struct ***opts);
 	bool opt1(char *opt);
 	bool opt2(char *opt);
-	void run(opt_struct ***opts);
+	void run(char **filename);
 	bool is_error();
 	char *get_error();
 private:
@@ -19,6 +19,7 @@ private:
 	bool skip = false;	
 	char **argv;
 	char *error = nullptr;
+	opt_struct ***opts;
 };
 
 #endif
