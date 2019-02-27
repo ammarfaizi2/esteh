@@ -4,6 +4,17 @@ Test single line and multiline comment.
 // This is a test
 // p "123\n"
 // print "Hello World\n"
+
+p "Test 123 qwe asd zxc";
+
+/**
+ * This is a multiline comment.
+ *
+ * p "Don't execute me!";
+ *
+ */
+
 print "Es Teh Memang Menyegarkan";
 --EXPECT--
+Test 123 qwe asd zxc
 Es Teh Memang Menyegarkan

@@ -1,5 +1,5 @@
 --TEST--
-Test simple arithmatic
+Test simple arithmetic
 
 --FILE--
 p 1;
