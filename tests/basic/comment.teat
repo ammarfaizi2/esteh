@@ -5,7 +5,7 @@ Test single line and multiline comment.
 // p "123\n"
 // print "Hello World\n"
 
-p "Test 123 qwe asd zxc";
+p "Test 123 qwe asd zxc\n";
 
 /**
  * This is a multiline comment.

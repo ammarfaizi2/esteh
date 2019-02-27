@@ -38,13 +38,13 @@ ${OBJECTS}:
 
 install:
 	${CP} ${TARGET_BIN} /usr/bin/${BIN_NAME}
+	chmod +x /usr/bin/${BIN_NAME}
 
 uninstall:
 	${RM} /usr/bin/${BIN_NAME}
 
 test:
 	php ${ROOT_DIR}/run_test.php
-	chmod +x /usr/bin/${BIN_NAME}
 
 strip:
 	${STRIP}
