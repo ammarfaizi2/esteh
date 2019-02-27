@@ -1,7 +1,7 @@
 
 COMPILER = g++
 LINKER = g++
-DEBUG_MODE = 1
+DEBUG_MODE = 0
 
 ROOT_DIR = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 BIN_NAME = esteh
@@ -39,8 +39,12 @@ ${OBJECTS}:
 install:
 	${CP} ${TARGET_BIN} /usr/bin/${BIN_NAME}
 
+uninstall:
+	${RM} /usr/bin/${BIN_NAME}
+
 test:
 	php ${ROOT_DIR}/run_test.php
+	chmod +x /usr/bin/${BIN_NAME}
 
 strip:
 	${STRIP}
