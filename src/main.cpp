@@ -1,4 +1,5 @@
 
+#include <cstdio>
 #include <stdlib.h>
 #include <esteh/usage.hpp>
 #include <esteh/argv_parser/opt_struct.hpp>
@@ -21,6 +22,14 @@ int main(int argc, char *argv[])
 	{
 		argv_parser *st = new argv_parser(argc, argv);
 		st->run(&opts);
+
+		if (st->is_error()) {
+			printf("Error: %s\n", st->get_error());
+			delete st;
+			st = nullptr;
+			exit(1);
+		}
+
 		delete st;
 		st = nullptr;
 	}
