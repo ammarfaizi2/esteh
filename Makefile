@@ -1,7 +1,7 @@
 
 COMPILER = g++
 LINKER = g++
-DEBUG_MODE = 0
+DEBUG_MODE = 1
 
 ROOT_DIR = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 BIN_NAME = esteh
