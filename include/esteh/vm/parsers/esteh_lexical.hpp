@@ -17,16 +17,13 @@ private:
 	char escape_char(char c);
 	void build_node(esteh_token *tkn);
 	uint16_t tokenize(char *token, uint32_t line, esteh_token **tkn);
-	void recursive_opeator_scan(
-		tea_node **node,
-		esteh_token *op1,
-		esteh_token *op2,
-		bool in_recursive = false
-	);
+	void recursive_token_scan(tea_node **node, bool called = false);
+	void t_constant_token_handler(tea_node **node);
 
 	int file_des;
 	char *map;
 	char *filename;
+	uint32_t cptr;
 	uint32_t anal_ptr = 0;
 	uint32_t filesize = 0;
 	uint32_t node_count = 0;

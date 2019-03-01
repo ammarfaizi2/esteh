@@ -215,7 +215,7 @@ void esteh_lexical::parse() {
 				token_size++;
 				if (i >= this->filesize) {
 					PARSE_ERROR(
-						"syntax error, unexpected end of file, unterminated string declaration in \"%s\" on line \"%d\"",
+						"syntax error, unexpected end of file, unterminated string declaration in \"%s\" on line %d",
 						this->filename,
 						line
 					);
@@ -298,107 +298,49 @@ void esteh_lexical::build_node(esteh_token *tkn) {
 		}
 
 	#define $node this->nodes
-	#define $ndc this->node_count
+	#define $ni this->node_count
 
 	if (tkn->type == t_keyword) {
 		switch (tkn->token) {
-
-
-			// Start handle print token.
 			case T_PRINT: {
-				
-
 				NODE_REALLOC
-				$node[$ndc] = (tea_node *)malloc(sizeof(tea_node));
-				$node[$ndc]->token = T_PRINT;
+				$node[$ni] = (tea_node *)malloc(sizeof(tea_node));
+				$node[$ni]->token = T_PRINT;
+				$node[$ni]->handler = (void *)esteh_print;
 				$aptr++;
-				tea_node **tmp = &($node[$ndc]);
-				while ($tk[$aptr + 1]->token != T_SEMICOLON) {
-
-					switch ($tk[$aptr]->type) {
-						// A print token at the end of file.
-						case t_end_of_file: {
-							PARSE_ERROR(
-								"syntax error, unexpected end of file in \"%s\" on line \"%d\"",
-								this->filename,
-								$tk[$aptr + 1]->line
-							);
-							exit(254);
-						}
-						break;
-
-						// t_constant (int, string, null)
-						case t_constant: {
-							if (
-								($tk[$aptr + 1]->token == TA_ADD || $tk[$aptr + 1]->token == TA_MIN) &&
-								($tk[$aptr + 3]->token == TA_MUL || $tk[$aptr + 3]->token == TA_DIV)
-							) {								
-								(*tmp)->op1_type = a_tea_node;
-								(*tmp)->op1.node = (tea_node *)malloc(sizeof(tea_node));
-								(*tmp)->op1.node->token = TA_ADD;
-
-								(*tmp)->op1.node->op1_type = a_constant;
-								(*tmp)->op1.node->op1.constant.val.lval = $tk[$aptr]->val.lval;
-								(*tmp)->op1.node->op1.constant.data_type = ESTEH_INT;
-
-								(*tmp)->op1.node->op2_type = a_tea_node;
-								(*tmp)->op1.node->op2.node = (tea_node *)malloc(sizeof(tea_node));
-								(*tmp)->op1.node->op2.node->token = $tk[$aptr + 3]->token;
-								(*tmp)->op1.node->op2.node->op1_type = a_constant;
-								(*tmp)->op1.node->op2.node->op1.constant.data_type = ESTEH_INT;
-								(*tmp)->op1.node->op2.node->op1.constant.val.lval = $tk[$aptr + 2]->val.lval;
-								tmp = &((*tmp)->op1.node->op2.node);
-							} else if ($tk[$aptr + 3]->token == T_SEMICOLON) {
-								(*tmp)->op1_type = a_tea_node;
-								(*tmp)->op1.node = (tea_node *)malloc(sizeof(tea_node));
-								(*tmp)->op1.node->token = TA_ADD;
-
-								(*tmp)->op1.node->op1_type = a_constant;
-								(*tmp)->op1.node->op1.constant.val.lval = $tk[$aptr]->val.lval;
-								(*tmp)->op1.node->op1.constant.data_type = ESTEH_INT;
-
-								(*tmp)->op1.node->op2_type = a_constant;
-								(*tmp)->op1.node->op2.constant.val.lval = $tk[$aptr + 2]->val.lval;
-								(*tmp)->op1.node->op2.constant.data_type = ESTEH_INT; 
-							} else {
-								(*tmp)->op2_type = a_constant;
-								(*tmp)->op2.constant.data_type = ESTEH_INT;
-								(*tmp)->op2.constant.val.lval = $tk[$aptr + 2]->val.lval;
-							}
-						}
-						break;
-
-						// t_operator (+, -, *, /. %)
-						case t_operator: {
-
-						}
-						break;
-
-						case t_symbol:
-						case t_keyword:
-						case t_unknown:
-						break;
-					}
-					$aptr++;
+				if ($tk[$aptr]->type == t_end_of_file) {
+					PARSE_ERROR(
+						"syntax error, unexpected end of file in \"%s\" on line %d",
+						this->filename,
+						$tk[$aptr]->line
+					);
+					exit(254);
 				}
 
-				node_dumper($node[$ndc]);
+				if ($tk[$aptr]->type == t_constant && $tk[$aptr + 1]->token == T_SEMICOLON) {
+					$node[$ni]->op1_type = a_constant;
+					$node[$ni]->op1.constant.val = $tk[$aptr]->val;
+					$node[$ni]->op1.constant.data_type = $tk[$aptr]->val_type;
+				} else if ($tk[$aptr + 1]->type == t_constant && $tk[$aptr]->type == t_operator) {
+					$node[$ni]->op1_type = a_tea_node;
+					$node[$ni]->op1.node = (tea_node *)malloc(sizeof(tea_node));
+					this->recursive_token_scan(&($node[$ni]->op1.node));
+				}
 
+				node_dumper($node[$ni]);
 			}
 			break;
-			// End handle print token.
-
-
 		}
 	}	
 }
 
-void esteh_lexical::recursive_opeator_scan(
-	tea_node **node,
-	esteh_token *op1,
-	esteh_token *op2,
-	bool in_recursive
-) {
+void esteh_lexical::recursive_token_scan(tea_node **node, bool called) {
+		
+}
+
+void esteh_lexical::t_constant_token_handler(tea_node **node) {
+
+
 }
 
 
