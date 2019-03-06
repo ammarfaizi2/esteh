@@ -7,6 +7,7 @@
 #include <esteh/vm/esteh_vm.h>
 #include <esteh/vm/esteh_token.h>
 #include <esteh/vm/parsers/parse_error.h>
+#include <esteh/vm/debugger/icetea_debugger.h>
 
 extern int fd;
 extern char *fmap;
@@ -40,7 +41,6 @@ void esteh_token_clean_up() {
 }
 
 int esteh_lexical_parser() {
-
 	tokens = (esteh_token **)malloc(ESTEH_TOKEN_FIRST_ALLOC);
 	uint32_t lineno = 0;
 

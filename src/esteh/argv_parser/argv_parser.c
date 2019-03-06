@@ -9,9 +9,14 @@
 
 #define $opt (*opts)
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
+
 static inline void esteh_version() {
 	write(1, ESTEH_VERSION "\n", sizeof(ESTEH_VERSION "\n") - 1);
 }
+
+#pragma GCC diagnostic pop
 
 uint16_t esteh_argv_parser(
 	int argc,

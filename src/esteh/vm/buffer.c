@@ -14,6 +14,9 @@ static inline void esteh_init_buffer() {
 	buffer_is_not_initialized_yet = false;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
+
 void esteh_add_buffer(char *buf, size_t len) {
 	if (buffer_is_not_initialized_yet) {
 		esteh_init_buffer();
@@ -46,3 +49,4 @@ void esteh_flush_buffer() {
 	}
 }
 
+#pragma GCC diagnostic pop

@@ -17,7 +17,6 @@
 #define T_NUMBER 201
 #define T_STRING 202
 
-
 enum token_type {
 	t_unknown = 0,
 	t_keyword = (1 << 0),

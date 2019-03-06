@@ -1,7 +1,7 @@
 
 COMPILER = gcc
 LINKER = gcc
-DEBUG_MODE = 1
+DEBUG_MODE = 0
 
 ROOT_DIR = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 BIN_NAME = esteh
@@ -13,7 +13,7 @@ _COMPILER_FLAGS = -Wall -c ${INC} -fpic
 LINKER_FLAGS = -Wall
 
 ifneq (${DEBUG_MODE},0)
-	COMPILER_FLAGS = ${_COMPILER_FLAGS} -ggdb -g3
+	COMPILER_FLAGS = ${_COMPILER_FLAGS} -ggdb -g3 -D ESTEH_DEBUG
 else
 	COMPILER_FLAGS = ${_COMPILER_FLAGS} -O2 -s
 endif
