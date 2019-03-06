@@ -1,6 +1,6 @@
 
-COMPILER = g++
-LINKER = g++
+COMPILER = gcc
+LINKER = gcc
 DEBUG_MODE = 1
 
 ROOT_DIR = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
