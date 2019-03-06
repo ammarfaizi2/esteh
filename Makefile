@@ -9,7 +9,7 @@ TARGET_BIN = ${ROOT_DIR}/${BIN_NAME}
 INC = -I${ROOT_DIR}/include
 SRC = ${ROOT_DIR}/src
 
-_COMPILER_FLAGS = -Wall -c -std=c++11 ${INC} -fpic
+_COMPILER_FLAGS = -Wall -c ${INC} -fpic
 LINKER_FLAGS = -Wall
 
 ifneq (${DEBUG_MODE},0)
@@ -26,7 +26,7 @@ MKDIR = mkdir -vp
 STRIP = strip -s ${TARGET_BIN}
 
 SOURCES = $(shell find ${SRC} -name '*.c')
-OBJECTS = $(SOURCES:%.cpp=%.cpp.o)
+OBJECTS = $(SOURCES:%.c=%.c.o)
 
 all: ${OBJECTS} ${TARGET_BIN}
 

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <esteh/usage.h>
+#include <esteh/argv_parser/argv_parser.h>
 
 int main(int argc, char *argv[])
 {
