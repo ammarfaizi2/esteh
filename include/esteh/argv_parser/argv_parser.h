@@ -2,12 +2,17 @@
 #ifndef ESTEH_ARGV_PARSER_ARGV_PARSER_H
 #define ESTEH_ARGV_PARSER_ARGV_PARSER_H
 
+#include <stdint.h>
 #include <stdbool.h>
+#include <esteh/argv_parser/argv_opt.h>
 
-typedef struct _argv_opt {
-
-} argv_opt;
-
-void esteh_argv_parser(char **argv, argv_opt ***opts, bool *is_error, char **error_message, char **filename);
+uint16_t esteh_argv_parser(
+	int argc,
+	char **argv,
+	argv_opt ***opts,
+	char **filename,
+	char ***app_argv,
+	int *app_argc
+);
 
 #endif
