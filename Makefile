@@ -25,7 +25,7 @@ MKDIR = mkdir -vp
 
 STRIP = strip -s ${TARGET_BIN}
 
-SOURCES = $(shell find ${SRC} -name '*.cpp')
+SOURCES = $(shell find ${SRC} -name '*.c')
 OBJECTS = $(SOURCES:%.cpp=%.cpp.o)
 
 all: ${OBJECTS} ${TARGET_BIN}
