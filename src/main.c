@@ -20,14 +20,7 @@ int main(int argc, char *argv[])
 	uint16_t opt_count = 0;
 
 	{
-		opt_count = esteh_argv_parser(
-			argc,
-			argv,
-			&opts,
-			&filename,
-			&app_argv,
-			&app_argc
-		);
+		opt_count = esteh_argv_parser(argc, argv, &opts, &filename, &app_argv, &app_argc);
 	}
 
 	#if 0
