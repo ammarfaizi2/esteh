@@ -19,6 +19,7 @@ private:
 	uint16_t tokenize(char *token, uint32_t line, esteh_token **tkn);
 	void recursive_token_scan(tea_node **node, bool called = false);
 	void t_constant_token_handler(tea_node **node);
+	void *get_handler(uint16_t token);
 
 	int file_des;
 	char *map;

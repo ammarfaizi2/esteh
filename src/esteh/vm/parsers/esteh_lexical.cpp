@@ -321,7 +321,7 @@ void esteh_lexical::build_node(esteh_token *tkn) {
 					$node[$ni]->op1_type = a_constant;
 					$node[$ni]->op1.constant.val = $tk[$aptr]->val;
 					$node[$ni]->op1.constant.data_type = $tk[$aptr]->val_type;
-				} else if ($tk[$aptr + 1]->type == t_constant && $tk[$aptr]->type == t_operator) {
+				} else if ($tk[$aptr]->type == t_constant && $tk[$aptr + 1]->type == t_operator) {
 					$node[$ni]->op1_type = a_tea_node;
 					$node[$ni]->op1.node = (tea_node *)malloc(sizeof(tea_node));
 					this->recursive_token_scan(&($node[$ni]->op1.node));
@@ -335,7 +335,84 @@ void esteh_lexical::build_node(esteh_token *tkn) {
 }
 
 void esteh_lexical::recursive_token_scan(tea_node **node, bool called) {
-		
+	
+	tea_node *tmp;
+	do {
+
+		if ($tk[$aptr]->type == t_constant) {
+			(*node)->op1_type = a_constant;
+			(*node)->op1.constant.val = $tk[$aptr]->val;
+			(*node)->op1.constant.data_type = $tk[$aptr]->val_type;
+		}
+
+		if ($tk[$aptr + 1]->type == t_constant) {
+			const char *me = get_token_name($tk[$aptr + 1]->token);
+			PARSE_ERROR(
+				"syntax error, unexpected %s in \"%s\" on line %d",
+				me,
+				this->filename,
+				$tk[$aptr + 1]->line
+			);
+			exit(254);
+		}
+
+		if ($tk[$aptr + 1]->type == t_operator) {
+
+			if ($tk[$aptr + 2]->token == T_SEMICOLON) {
+				const char *me = get_token_name($tk[$aptr + 1]->token);
+				PARSE_ERROR(
+					"syntax error, unexpected %s in \"%s\" on line %d",
+					me,
+					this->filename,
+					$tk[$aptr + 1]->line
+				);
+				exit(254);
+			} else if ($tk[$aptr + 2]->type == t_constant) {
+
+				if ($tk[$aptr + 3]->token == T_SEMICOLON) {
+					(*node)->op2_type = a_constant;
+					(*node)->op2.constant.val = $tk[$aptr + 2]->val;
+					(*node)->op2.constant.data_type = $tk[$aptr + 2]->val_type;
+					(*node)->result.constant.data_type = ESTEH_INT;
+					(*node)->result_type = a_constant;
+					$aptr += 3;
+					return;
+				}
+
+				if ($tk[$aptr + 3]->type == t_operator) {
+
+					if ($tk[$aptr + 3]->token > $tk[$aptr + 1]->token) {
+						(*node)->token = $tk[$aptr + 1]->token;
+						(*node)->handler = this->get_handler($tk[$aptr + 1]->token);
+						(*node)->op2_type = a_tea_node;
+						(*node)->op2.node = (tea_node *)malloc(sizeof(tea_node));
+					}
+
+				}
+
+			}
+
+		}
+
+	} while ($tk[$aptr]->token != T_SEMICOLON);
+}
+
+void *esteh_lexical::get_handler(uint16_t token) {
+	switch(token) {
+		case TA_ADD:
+			return (void *)icetea_add;
+		break;
+		case TA_MIN:
+			return (void *)icetea_min;
+		break;
+		case TA_MUL:
+			return (void *)icetea_mul;
+		break;
+		case TA_DIV:
+			return (void *)icetea_div;
+		break;
+	}
+	return nullptr;
 }
 
 void esteh_lexical::t_constant_token_handler(tea_node **node) {
@@ -353,6 +430,8 @@ char esteh_lexical::escape_char(char c) {
 		ECX('a', '\a');
 		ECX('e', '\e');
 		ECX('v', '\v');
+		ECX('r', '\r');
+		ECX('f', '\f');
 		ECX('t', '\t');
 		ECX('n', '\n');
 	}
