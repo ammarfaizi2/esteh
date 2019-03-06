@@ -39,6 +39,12 @@ int main(int argc, char *argv[])
 	#endif
 
 	int exit_code = esteh_vm(filename, opt_count, opts, app_argc, app_argv);
+
+	free(opts);
+	free(app_argv);
+	opts = NULL;
+	app_argv = NULL;
+
 	// esteh_vm_end_shutdown();
 	return exit_code;
 }

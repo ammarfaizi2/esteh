@@ -12,6 +12,7 @@ int esteh_vm(
 	char **argv
 );
 int esteh_vm_parse_file(char *filename);
+int esteh_lexical_parser();
 void esteh_vm_shutdown();
 void esteh_vm_end_shutdown();
 
