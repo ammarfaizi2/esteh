@@ -36,7 +36,7 @@ void esteh_token_clean_up() {
 				tokens[i]->tkn_val.nonc.val = NULL;
 			}
 		}
-		printf("free %d\n", i);
+		TOKEN_DUMPER(tokens[i]);
 		free(tokens[i]);
 		tokens[i] = NULL;
 	}
@@ -80,7 +80,6 @@ whitespace_parser:
 			// Skip save first whitespace.
 			if (token_count > 0) {
 				ESTEH_TOKEN_REALLOC
-				printf("mer %d\n", token_count);
 				tokens[token_count] = (esteh_token *)malloc(sizeof(esteh_token));
 				tokens[token_count]->tkn_code = T_WHITESPACE;
 				tokens[token_count]->tkn_type = t_whitespace;
@@ -200,7 +199,7 @@ comment_parser:
 
 		bool is_negative = false;
 		bool maybe_num_quantifier = false;
-// t_number_parser:
+t_number_parser:
 		if (fmap[i] >= '0' && fmap[i] <= '9') {
 
 			//
@@ -289,25 +288,25 @@ comment_parser:
 			token_count++;
 		}
 
-		// if (fmap[i] == '-') {
-		// 	if (token_count > 0) {
+		if (fmap[i] == '-') {
+			if (token_count > 0) {
 
-		// 		if (tokens[token_count - 1]->tkn_type != t_constant) {
-		// 			i++;
-		// 			is_negative = true;
-		// 			maybe_num_quantifier = true;
-		// 			goto t_number_parser;
-		// 			continue;
-		// 		}
+				if (tokens[token_count - 1]->tkn_type != t_constant) {
+					i++;
+					is_negative = true;
+					maybe_num_quantifier = true;
+					goto t_number_parser;
+					continue;
+				}
 
-		// 		if (tokens[token_count - 1]->tkn_type == t_whitespace) {
-		// 			token_count--;
-		// 		} else {
-		// 			ESTEH_TOKEN_REALLOC
-		// 			tokens[token_count] = (esteh_token *)malloc(sizeof(esteh_token));
-		// 		}
-		// 	}
-		// }
+				if (tokens[token_count - 1]->tkn_type == t_whitespace) {
+					token_count--;
+				} else {
+					ESTEH_TOKEN_REALLOC
+					tokens[token_count] = (esteh_token *)malloc(sizeof(esteh_token));
+				}
+			}
+		}
 	}
 
 	for (uint32_t i = 0; i < token_count; ++i) {
