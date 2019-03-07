@@ -49,6 +49,7 @@ uint16_t esteh_argv_parser(
 					switch(argv[i][1]) {
 						case 'v':
 							esteh_version();
+							exit(0);
 						break;
 					}
 				} else {
@@ -59,6 +60,7 @@ uint16_t esteh_argv_parser(
 					argv[i] = argv[i]+2;
 					if (SCMP(argv[i], "version")) {
 						esteh_version();
+						exit(0);
 					}
 				}
 				continue;
