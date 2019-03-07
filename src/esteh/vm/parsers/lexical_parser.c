@@ -17,6 +17,8 @@ extern esteh_token **tokens;
 extern uint32_t token_count;
 extern size_t token_cur_size;
 
+inline static void escape_char(size_t *cur_strlen, char **tmp, char *fmap, size_t *pos);
+
 #define ESTEH_TOKEN_REALLOC \
 	if (((token_count + 3) * sizeof(esteh_token *)) >= token_cur_size) { \
 		token_cur_size += ESTEH_TOKEN_FIRST_ALLOC; \
@@ -43,8 +45,6 @@ void esteh_token_clean_up() {
 	tokens = NULL;
 	
 }
-
-inline static void escape_char();
 
 int esteh_lexical_parser() {
 	tokens = (esteh_token **)malloc(ESTEH_TOKEN_FIRST_ALLOC);
