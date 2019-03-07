@@ -14,17 +14,16 @@ addons:
 cache:
     apt: true
 
-install:
-  - make -j2
-  - sudo make install
+#install:
+#  - make -j2
+#  - sudo make install
 
 script:
-  - echo 123
   # Debug mode.
-  # - make -j2
-  # - sudo make install
-  # - esteh --version
-  # - make test
+  - make -j2
+  - sudo make install
+  - esteh --version
+  #- make test
 
   # # Clean up.
   # - make clean
