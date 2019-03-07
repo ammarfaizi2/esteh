@@ -18,8 +18,7 @@ extern uint32_t token_count;
 extern size_t token_cur_size;
 
 #define ESTEH_TOKEN_REALLOC \
-	printf("tkn %d\n", token_count); \
-	if (((token_count + 1) * sizeof(esteh_token *)) >= token_cur_size) { \
+	if (((token_count + 3) * sizeof(esteh_token *)) >= token_cur_size) { \
 		token_cur_size += ESTEH_TOKEN_FIRST_ALLOC; \
 		tokens = (esteh_token **)realloc(tokens, token_cur_size); \
 	} \
@@ -42,7 +41,7 @@ void esteh_token_clean_up() {
 	}
 	free(tokens);
 	tokens = NULL;
-	token_count = 0;
+	
 }
 
 inline static void escape_char();
@@ -159,15 +158,12 @@ comment_parser:
 						filename,
 						lineno
 					);
-					esteh_vm_shutdown();
+					
 					exit(254);
 				} else {
 					if (fmap[i] == '\n') lineno++;
 					if (escaped) {
-						escape_char(
-							&cur_strlen,
-							&tmp, fmap, &i
-						);
+						escape_char(&cur_strlen, &tmp, fmap, &i);
 						escaped = false;
 						continue;
 					}
@@ -199,6 +195,7 @@ comment_parser:
 
 		bool is_negative = false;
 		bool maybe_num_symbol = false;
+
 t_number_parser:
 		if (fmap[i] >= '0' && fmap[i] <= '9') {
 
@@ -222,19 +219,14 @@ t_number_parser:
 							filename,
 							lineno
 						);
-						esteh_vm_shutdown();
 						exit(254);
 					}
 					is_float = true;
 				}
 				i++;
-			}			
-			if (tokens[token_count - 1]->tkn_type == t_whitespace) {
-				token_count--;
-			} else {
-				ESTEH_TOKEN_REALLOC
-				tokens[token_count] = (esteh_token *)malloc(sizeof(esteh_token));
 			}
+
+			ESTEH_TOKEN_REALLOC
 			tokens[token_count] = (esteh_token *)malloc(sizeof(esteh_token));
 			tokens[token_count]->tkn_code = T_NUMBER;
 			tokens[token_count]->tkn_type = t_constant;
@@ -245,31 +237,13 @@ t_number_parser:
 				// TODO: Parse floating number.
 				// Casting to double for now. Have to fix this in the future.
 				tokens[token_count]->tkn_val.data.val.fval = (double)atol(tmp);
-				if (is_negative) {
-					tokens[token_count]->tkn_val.data.val.fval *= -1;
-					is_negative = false;
-				}
 			} else {
 				tokens[token_count]->tkn_val.data.type = tea_integer;
 				tokens[token_count]->tkn_val.data.val.llval = atol(tmp);
-				if (is_negative) {
-					tokens[token_count]->tkn_val.data.val.llval *= -1;
-					is_negative = false;
-				}
 			}
 			free(tmp);
 			tmp = NULL;
 			token_count++;
-			i--;
-		} else if (maybe_num_symbol) {
-			PARSE_ERROR(
-				"syntax error, unexpected '%c', in \"%s\" on line %d",
-				fmap[i - 1],
-				filename,
-				lineno
-			);
-			esteh_vm_shutdown();
-			exit(254);
 		}
 
 		if (fmap[i] == '+') {
@@ -286,35 +260,35 @@ t_number_parser:
 			tokens[token_count]->lineno = lineno;
 			tokens[token_count]->tkn_val.nonc.val = NULL;
 			token_count++;
+			continue;
 		}
 
-		// if (fmap[i] == '-') {
-		// 	if (token_count > 0) {
+		if (fmap[i] == '-') {
+			if (token_count > 0) {
+				if (tokens[token_count - 1]->tkn_type != t_constant) {
+					is_negative = true;
+					maybe_num_symbol = true;
+					i++;
+					goto t_number_parser;
+					continue;
+				}
+			}
+		}
 
-		// 		if (tokens[token_count - 1]->tkn_type != t_constant) {
-		// 			i++;
-		// 			is_negative = true;
-		// 			maybe_num_symbol = true;
-		// 			goto t_number_parser;
-		// 			continue;
-		// 		}
-
-		// 		if (tokens[token_count - 1]->tkn_type == t_whitespace) {
-		// 			// token_count;
-		// 		} else {
-		// 			ESTEH_TOKEN_REALLOC
-		// 			tokens[token_count] = (esteh_token *)malloc(sizeof(esteh_token));
-		// 		}
-		// 	}
-		// }
 	}
 
-	for (uint32_t i = 0; i < token_count; ++i) {
+	if (tokens[token_count - 1]->tkn_type == t_whitespace) {
+		free(tokens[token_count - 1]);
+		tokens[token_count - 1] = NULL;
+		token_count--;
+	}
+
+	for (uint32_t i = 0; i < token_count; ++i)
+	{
 		TOKEN_DUMPER(tokens[i]);
 	}
 
 
-	esteh_token_clean_up();
 	return 0;
 }
 
@@ -351,7 +325,6 @@ inline static void escape_char(size_t *cur_strlen, char **tmp, char *fmap, size_
 		DMQQ('b', '\b')
 			return;
 		break;
-
 
 		#if 0
 		case 'x':

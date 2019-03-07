@@ -26,10 +26,10 @@
 	} else if (DT.type == tea_integer) { \
 		printf(" Value   : %lld\n", DT.val.llval); \
 	} else if (DT.type == tea_string) { \
-		write(1, " Value   : \"", sizeof(" Value\t: \"") - 1); \
+		write(1, " Value   : \"", sizeof(" Value   : \"") - 1); \
 		write(1, DT.val.str.val, DT.val.str.len); \
 		write(1, "\"\n", sizeof("\"\n") - 1); \
-		write(1, " Length  : ", sizeof(" Length\t: ") - 1); \
+		write(1, " Length  : ", sizeof(" Length  : ") - 1); \
 		printf("%ld\n", DT.val.str.len); \
 		fflush(stdout); \
 	}
