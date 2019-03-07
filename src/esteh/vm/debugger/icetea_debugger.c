@@ -27,6 +27,14 @@ char *get_token_name(uint16_t tkn_code) {
 		SWR(T_NUMBER, "T_NUMBER");
 		SWR(T_STRING, "T_STRING");
 		SWR(T_SEMICOLON, "T_SEMICOLON");
+		SWR(T_OP_ADD, "T_OP_ADD");
+		SWR(T_OP_MIN, "T_OP_MIN");
+		SWR(T_OP_DIV, "T_OP_DIV");
+		SWR(T_OP_MUL, "T_OP_MUL");
+		SWR(T_OP_MOD, "T_OP_MOD");
+		SWR(T_OP_BOOL_NOT, "T_OP_BOOL_NOT");
+		SWR(T_OP_LESS_THAN, "T_OP_LESS_THAN");
+		SWR(T_OP_GREATER_THAN, "T_OP_GREATER_THAN");
 	}
 	return "undefined_token_name";
 }

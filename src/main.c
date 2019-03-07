@@ -5,6 +5,8 @@
 #include <esteh/argv_parser/argv_parser.h>
 
 char *filename;
+char **app_argv;
+argv_opt **opts;
 
 int main(int argc, char *argv[])
 {
@@ -15,8 +17,6 @@ int main(int argc, char *argv[])
 	}
 
 	int app_argc = 0;
-	char **app_argv;
-	argv_opt **opts;
 	uint16_t opt_count = 0;
 
 	{

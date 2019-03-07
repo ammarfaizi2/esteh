@@ -8,6 +8,10 @@
 #include <esteh/vm/esteh_vm.h>
 #include <esteh/vm/esteh_token.h>
 
+// From main.c
+extern char **app_argv; 
+extern argv_opt **opts;
+
 int fd = 0;
 char *fmap = NULL;
 size_t fmap_size = 0;
@@ -62,4 +66,12 @@ int esteh_vm_parse_file(char *filename) {
 	// We prevent an invalid address in lexical parser, since it needs to look up the next token.
 
 	return 0;
+}
+
+void esteh_vm_shutdown() {
+	esteh_token_clean_up();
+	free(opts);
+	free(app_argv);
+	opts = NULL;
+	app_argv = NULL;
 }

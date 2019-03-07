@@ -17,6 +17,15 @@
 #define T_NUMBER 201
 #define T_STRING 202
 
+#define T_OP_ADD 300
+#define T_OP_MIN 301
+#define T_OP_DIV 302
+#define T_OP_MUL 303
+#define T_OP_MOD 304
+#define T_OP_BOOL_NOT 305
+#define T_OP_LESS_THAN 306
+#define T_OP_GREATER_THAN 307
+
 enum token_type {
 	t_unknown = 0,
 	t_keyword = (1 << 0),
