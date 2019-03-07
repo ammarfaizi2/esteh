@@ -18,7 +18,8 @@ extern uint32_t token_count;
 extern size_t token_cur_size;
 
 #define ESTEH_TOKEN_REALLOC \
-	if (((token_count + 3) * sizeof(esteh_token *)) >= token_cur_size) { \
+	printf("tkn %d\n", token_count); \
+	if (((token_count + 1) * sizeof(esteh_token *)) >= token_cur_size) { \
 		token_cur_size += ESTEH_TOKEN_FIRST_ALLOC; \
 		tokens = (esteh_token **)realloc(tokens, token_cur_size); \
 	} \
@@ -164,7 +165,7 @@ comment_parser:
 					if (fmap[i] == '\n') lineno++;
 					if (escaped) {
 						escape_char(
-							&cur_stralloc, &cur_strlen,
+							&cur_strlen,
 							&tmp, fmap, &i
 						);
 						escaped = false;
@@ -287,25 +288,25 @@ t_number_parser:
 			token_count++;
 		}
 
-		if (fmap[i] == '-') {
-			if (token_count > 0) {
+		// if (fmap[i] == '-') {
+		// 	if (token_count > 0) {
 
-				if (tokens[token_count - 1]->tkn_type != t_constant) {
-					i++;
-					is_negative = true;
-					maybe_num_quantifier = true;
-					goto t_number_parser;
-					continue;
-				}
+		// 		if (tokens[token_count - 1]->tkn_type != t_constant) {
+		// 			i++;
+		// 			is_negative = true;
+		// 			maybe_num_symbol = true;
+		// 			goto t_number_parser;
+		// 			continue;
+		// 		}
 
-				if (tokens[token_count - 1]->tkn_type == t_whitespace) {
-					token_count--;
-				} else {
-					ESTEH_TOKEN_REALLOC
-					tokens[token_count] = (esteh_token *)malloc(sizeof(esteh_token));
-				}
-			}
-		}
+		// 		if (tokens[token_count - 1]->tkn_type == t_whitespace) {
+		// 			// token_count;
+		// 		} else {
+		// 			ESTEH_TOKEN_REALLOC
+		// 			tokens[token_count] = (esteh_token *)malloc(sizeof(esteh_token));
+		// 		}
+		// 	}
+		// }
 	}
 
 	for (uint32_t i = 0; i < token_count; ++i) {
@@ -313,10 +314,11 @@ t_number_parser:
 	}
 
 
+	esteh_token_clean_up();
 	return 0;
 }
 
-inline static void escape_char(size_t *cur_stralloc, size_t *cur_strlen, char **tmp, char *fmap, size_t *pos) {
+inline static void escape_char(size_t *cur_strlen, char **tmp, char *fmap, size_t *pos) {
 
 	#define DMQQ(A,B) \
 		case A: \
