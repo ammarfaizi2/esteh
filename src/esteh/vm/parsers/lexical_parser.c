@@ -197,7 +197,7 @@ comment_parser:
 		}
 
 		bool is_negative = false;
-		bool maybe_num_quantifier = false;
+		bool maybe_num_symbol = false;
 t_number_parser:
 		if (fmap[i] >= '0' && fmap[i] <= '9') {
 
@@ -260,7 +260,7 @@ t_number_parser:
 			tmp = NULL;
 			token_count++;
 			i--;
-		} else if (maybe_num_quantifier) {
+		} else if (maybe_num_symbol) {
 			PARSE_ERROR(
 				"syntax error, unexpected '%c', in \"%s\" on line %d",
 				fmap[i - 1],
@@ -349,6 +349,18 @@ inline static void escape_char(size_t *cur_stralloc, size_t *cur_strlen, char **
 		DMQQ('b', '\b')
 			return;
 		break;
+
+
+		#if 0
+		case 'x':
+			// TODO: Parse hexadecimal char format.
+		break;
+		default:
+			if (fmap[*pos] >= '0' && fmap[*pos] <= '7') {
+				// TODO: Parse octal char format.
+			}
+		break;
+		#endif
 	}
 }
 
