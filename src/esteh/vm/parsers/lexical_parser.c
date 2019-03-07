@@ -36,7 +36,6 @@ void esteh_token_clean_up() {
 				tokens[i]->tkn_val.nonc.val = NULL;
 			}
 		}
-		TOKEN_DUMPER(tokens[i]);
 		free(tokens[i]);
 		tokens[i] = NULL;
 	}
