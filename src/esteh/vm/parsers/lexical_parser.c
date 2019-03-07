@@ -49,7 +49,6 @@ inline static void escape_char();
 int esteh_lexical_parser() {
 	tokens = (esteh_token **)malloc(ESTEH_TOKEN_FIRST_ALLOC);
 	uint32_t lineno = 0;
-
 	for (size_t i = 0; i < fmap_size; ++i) {
 		
 		if (fmap[i] == ';') {
@@ -63,12 +62,12 @@ int esteh_lexical_parser() {
 			continue;
 		}
 
+
 		bool whitespace_go_back = false;
 		if (fmap[i] == '\n') lineno++;
 		if (fmap[i] == '\n' || fmap[i] == ' ' || fmap[i] == '\r' || fmap[i] == '\t') {
 			i++;
 			while ((i < fmap_size) && (fmap[i] == '\n' || fmap[i] == ' ' || fmap[i] == '\r' || fmap[i] == '\t')) i++;
-
 			if (fmap[i] == '/') {
 				whitespace_go_back = true;
 				goto comment_parser;
@@ -237,23 +236,27 @@ t_number_parser:
 				// TODO: Parse floating number.
 				// Casting to double for now. Have to fix this in the future.
 				tokens[token_count]->tkn_val.data.val.fval = (double)atol(tmp);
+				if (is_negative) {
+					tokens[token_count]->tkn_val.data.val.fval *= -1;					
+				}
 			} else {
 				tokens[token_count]->tkn_val.data.type = tea_integer;
 				tokens[token_count]->tkn_val.data.val.llval = atol(tmp);
+				if (is_negative) {
+					tokens[token_count]->tkn_val.data.val.llval *= -1;					
+				}
 			}
 			free(tmp);
 			tmp = NULL;
+			i--;
 			token_count++;
+			continue;
 		}
 
 		if (fmap[i] == '+') {
 			if (token_count > 0) {
-				if (tokens[token_count - 1]->tkn_type == t_whitespace) {
-					token_count--;
-				} else {
-					ESTEH_TOKEN_REALLOC
-					tokens[token_count] = (esteh_token *)malloc(sizeof(esteh_token));
-				}
+				ESTEH_TOKEN_REALLOC
+				tokens[token_count] = (esteh_token *)malloc(sizeof(esteh_token));
 			}
 			tokens[token_count]->tkn_code = T_OP_ADD;
 			tokens[token_count]->tkn_type = t_operator;
@@ -277,6 +280,7 @@ t_number_parser:
 
 	}
 
+	// If the latest token is a T_WHITESPACE, then ignore it.
 	if (tokens[token_count - 1]->tkn_type == t_whitespace) {
 		free(tokens[token_count - 1]);
 		tokens[token_count - 1] = NULL;
