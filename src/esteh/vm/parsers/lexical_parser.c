@@ -251,6 +251,16 @@ t_number_parser:
 			i--;
 			token_count++;
 			continue;
+		} else if (maybe_num_symbol) {
+			maybe_num_symbol = false;
+			PARSE_ERROR(
+				"syntax error, unexpected '%c', in \"%s\" on line %d",
+				fmap[i],
+				filename,
+				lineno
+			);
+			esteh_vm_shutdown();
+			exit(254);
 		}
 
 		if (fmap[i] == '+') {
