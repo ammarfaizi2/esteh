@@ -41,7 +41,7 @@ void esteh_token_clean_up() {
 	}
 	free(tokens);
 	tokens = NULL;
-	token_count = 0;
+	
 }
 
 inline static void escape_char();
@@ -49,7 +49,6 @@ inline static void escape_char();
 int esteh_lexical_parser() {
 	tokens = (esteh_token **)malloc(ESTEH_TOKEN_FIRST_ALLOC);
 	uint32_t lineno = 0;
-
 	for (size_t i = 0; i < fmap_size; ++i) {
 		
 		if (fmap[i] == ';') {
@@ -63,12 +62,12 @@ int esteh_lexical_parser() {
 			continue;
 		}
 
+
 		bool whitespace_go_back = false;
 		if (fmap[i] == '\n') lineno++;
 		if (fmap[i] == '\n' || fmap[i] == ' ' || fmap[i] == '\r' || fmap[i] == '\t') {
 			i++;
 			while ((i < fmap_size) && (fmap[i] == '\n' || fmap[i] == ' ' || fmap[i] == '\r' || fmap[i] == '\t')) i++;
-
 			if (fmap[i] == '/') {
 				whitespace_go_back = true;
 				goto comment_parser;
@@ -158,15 +157,12 @@ comment_parser:
 						filename,
 						lineno
 					);
-					esteh_vm_shutdown();
+					
 					exit(254);
 				} else {
 					if (fmap[i] == '\n') lineno++;
 					if (escaped) {
-						escape_char(
-							&cur_stralloc, &cur_strlen,
-							&tmp, fmap, &i
-						);
+						escape_char(&cur_strlen, &tmp, fmap, &i);
 						escaped = false;
 						continue;
 					}
@@ -198,6 +194,7 @@ comment_parser:
 
 		bool is_negative = false;
 		bool maybe_num_symbol = false;
+
 t_number_parser:
 		if (fmap[i] >= '0' && fmap[i] <= '9') {
 
@@ -221,19 +218,14 @@ t_number_parser:
 							filename,
 							lineno
 						);
-						esteh_vm_shutdown();
 						exit(254);
 					}
 					is_float = true;
 				}
 				i++;
-			}			
-			if (tokens[token_count - 1]->tkn_type == t_whitespace) {
-				token_count--;
-			} else {
-				ESTEH_TOKEN_REALLOC
-				tokens[token_count] = (esteh_token *)malloc(sizeof(esteh_token));
 			}
+
+			ESTEH_TOKEN_REALLOC
 			tokens[token_count] = (esteh_token *)malloc(sizeof(esteh_token));
 			tokens[token_count]->tkn_code = T_NUMBER;
 			tokens[token_count]->tkn_type = t_constant;
@@ -245,25 +237,25 @@ t_number_parser:
 				// Casting to double for now. Have to fix this in the future.
 				tokens[token_count]->tkn_val.data.val.fval = (double)atol(tmp);
 				if (is_negative) {
-					tokens[token_count]->tkn_val.data.val.fval *= -1;
-					is_negative = false;
+					tokens[token_count]->tkn_val.data.val.fval *= -1;					
 				}
 			} else {
 				tokens[token_count]->tkn_val.data.type = tea_integer;
 				tokens[token_count]->tkn_val.data.val.llval = atol(tmp);
 				if (is_negative) {
-					tokens[token_count]->tkn_val.data.val.llval *= -1;
-					is_negative = false;
+					tokens[token_count]->tkn_val.data.val.llval *= -1;					
 				}
 			}
 			free(tmp);
 			tmp = NULL;
-			token_count++;
 			i--;
+			token_count++;
+			continue;
 		} else if (maybe_num_symbol) {
+			maybe_num_symbol = false;
 			PARSE_ERROR(
 				"syntax error, unexpected '%c', in \"%s\" on line %d",
-				fmap[i - 1],
+				fmap[i],
 				filename,
 				lineno
 			);
@@ -273,42 +265,40 @@ t_number_parser:
 
 		if (fmap[i] == '+') {
 			if (token_count > 0) {
-				if (tokens[token_count - 1]->tkn_type == t_whitespace) {
-					token_count--;
-				} else {
-					ESTEH_TOKEN_REALLOC
-					tokens[token_count] = (esteh_token *)malloc(sizeof(esteh_token));
-				}
+				ESTEH_TOKEN_REALLOC
+				tokens[token_count] = (esteh_token *)malloc(sizeof(esteh_token));
 			}
 			tokens[token_count]->tkn_code = T_OP_ADD;
 			tokens[token_count]->tkn_type = t_operator;
 			tokens[token_count]->lineno = lineno;
 			tokens[token_count]->tkn_val.nonc.val = NULL;
 			token_count++;
+			continue;
 		}
 
 		if (fmap[i] == '-') {
 			if (token_count > 0) {
-
 				if (tokens[token_count - 1]->tkn_type != t_constant) {
-					i++;
 					is_negative = true;
-					maybe_num_quantifier = true;
+					maybe_num_symbol = true;
+					i++;
 					goto t_number_parser;
 					continue;
 				}
-
-				if (tokens[token_count - 1]->tkn_type == t_whitespace) {
-					token_count--;
-				} else {
-					ESTEH_TOKEN_REALLOC
-					tokens[token_count] = (esteh_token *)malloc(sizeof(esteh_token));
-				}
 			}
 		}
+
 	}
 
-	for (uint32_t i = 0; i < token_count; ++i) {
+	// If the latest token is a T_WHITESPACE, then ignore it.
+	if (tokens[token_count - 1]->tkn_type == t_whitespace) {
+		free(tokens[token_count - 1]);
+		tokens[token_count - 1] = NULL;
+		token_count--;
+	}
+
+	for (uint32_t i = 0; i < token_count; ++i)
+	{
 		TOKEN_DUMPER(tokens[i]);
 	}
 
@@ -316,7 +306,7 @@ t_number_parser:
 	return 0;
 }
 
-inline static void escape_char(size_t *cur_stralloc, size_t *cur_strlen, char **tmp, char *fmap, size_t *pos) {
+inline static void escape_char(size_t *cur_strlen, char **tmp, char *fmap, size_t *pos) {
 
 	#define DMQQ(A,B) \
 		case A: \
@@ -349,7 +339,6 @@ inline static void escape_char(size_t *cur_stralloc, size_t *cur_strlen, char **
 		DMQQ('b', '\b')
 			return;
 		break;
-
 
 		#if 0
 		case 'x':
