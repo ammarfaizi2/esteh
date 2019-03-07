@@ -26,7 +26,10 @@ extern size_t token_cur_size;
 void esteh_token_clean_up() {
 	for (size_t i = 0; i < token_count; ++i) {
 		if (tokens[i]->tkn_type == t_constant) {
-			
+			if (tokens[i]->tkn_val.data.type == TEA_STRING) {
+				free(tokens[i]->tkn_val.data.val.str.val);
+				tokens[i]->tkn_val.data.val.str.val = NULL;
+			}
 		} else {
 			if (tokens[i]->tkn_val.nonc.val != NULL) {
 				free(tokens[i]->tkn_val.nonc.val);
@@ -38,7 +41,10 @@ void esteh_token_clean_up() {
 	}
 	free(tokens);
 	tokens = NULL;
+
 }
+
+inline static void escape_char();
 
 int esteh_lexical_parser() {
 	tokens = (esteh_token **)malloc(ESTEH_TOKEN_FIRST_ALLOC);
@@ -46,9 +52,44 @@ int esteh_lexical_parser() {
 
 	for (size_t i = 0; i < fmap_size; ++i) {
 		
+		if (fmap[i] == ';') {
+			ESTEH_TOKEN_REALLOC
+			tokens[token_count] = (esteh_token *)malloc(sizeof(esteh_token));
+			tokens[token_count]->tkn_code = T_SEMICOLON;
+			tokens[token_count]->tkn_type = t_semicolon;
+			tokens[token_count]->lineno = lineno;
+			tokens[token_count]->tkn_val.nonc.val = NULL;
+			token_count++;
+			continue;
+		}
+
+		bool whitespace_go_back = false;
 		if (fmap[i] == '\n') lineno++;
+		if (fmap[i] == '\n' || fmap[i] == ' ' || fmap[i] == '\r' || fmap[i] == '\t') {
+			i++;
+			while ((i < fmap_size) && (fmap[i] == '\n' || fmap[i] == ' ' || fmap[i] == '\r' || fmap[i] == '\t')) i++;
+
+			if (fmap[i] == '/') {
+				whitespace_go_back = true;
+				goto comment_parser;
+			}
+
+whitespace_parser:
+	
+			// Skip save first whitespace.
+			if (token_count > 0) {
+				ESTEH_TOKEN_REALLOC
+				tokens[token_count] = (esteh_token *)malloc(sizeof(esteh_token));
+				tokens[token_count]->tkn_code = T_WHITESPACE;
+				tokens[token_count]->tkn_type = t_whitespace;
+				tokens[token_count]->lineno = lineno;
+				tokens[token_count]->tkn_val.nonc.val = NULL;
+				token_count++;
+			}
+		}
 
 		if (fmap[i] == '/') {
+comment_parser:
 			// Parse multiline comment.
 			if (fmap[i + 1] == '*') {
 				i++;
@@ -66,6 +107,10 @@ int esteh_lexical_parser() {
 				while ((i < fmap_size) && (fmap[i] != '\n')) i++;
 				lineno++;
 				continue;
+			}
+
+			if (whitespace_go_back) {
+				goto whitespace_parser;
 			}
 		}
 
@@ -87,9 +132,66 @@ int esteh_lexical_parser() {
 			ESTEH_TOKEN_REALLOC
 			tokens[token_count] = (esteh_token *)malloc(sizeof(esteh_token));
 			tokens[token_count]->lineno = lineno;
-			tokens[token_count]->tkn_val.nonc.len = i - token_start;
-			tokens[token_count]->tkn_val.nonc.val = (char *)malloc(tokens[token_count]->tkn_val.nonc.len);
-			memcpy(tokens[token_count]->tkn_val.nonc.val, fmap + token_start, tokens[token_count]->tkn_val.nonc.len);
+			token_analyze(fmap + token_start, i - token_start, &tokens[token_count]);
+			token_count++;
+			i--;
+		}
+
+		if (fmap[i] == '"') {
+			bool escaped = false;
+			#define TMP_STR_FIRST_ALLOC 30;
+			size_t cur_stralloc = TMP_STR_FIRST_ALLOC;
+			char *tmp = (char *)malloc(cur_stralloc);
+			size_t cur_strlen = 0;
+			i++;
+			while (fmap[i] != '"') {
+
+				if ((cur_strlen + 2) > cur_stralloc) {
+					cur_stralloc += TMP_STR_FIRST_ALLOC;
+					tmp = (char *)realloc(tmp, cur_stralloc);
+					continue;
+				}
+
+				if (i >= fmap_size) {
+					PARSE_ERROR(
+						"syntax error, unexpected end of file, in \"%s\" on line %d",
+						filename,
+						lineno
+					);
+					exit(254);
+				} else {
+					if (fmap[i] == '\n') lineno++;
+					if (escaped) {
+						escape_char(
+							&cur_stralloc, &cur_strlen,
+							&tmp, fmap, &i
+						);
+						escaped = false;
+						continue;
+					}
+					if (fmap[i] == '\\') {
+						escaped = true;
+						i++;
+						continue;
+					}
+					tmp[cur_strlen] = fmap[i];
+					cur_strlen++;
+					i++;
+				}
+
+			}
+
+			ESTEH_TOKEN_REALLOC
+			tokens[token_count] = (esteh_token *)malloc(sizeof(esteh_token));
+			tokens[token_count]->tkn_code = T_STRING;
+			tokens[token_count]->tkn_type = t_constant;
+			tokens[token_count]->lineno = lineno;
+			tokens[token_count]->tkn_val.data.type = TEA_STRING;
+			tokens[token_count]->tkn_val.data.val.str.len = cur_strlen;
+			tokens[token_count]->tkn_val.data.val.str.val = (char *)malloc(tokens[token_count]->tkn_val.data.val.str.len);
+			memcpy(tokens[token_count]->tkn_val.data.val.str.val, tmp, tokens[token_count]->tkn_val.data.val.str.len);
+			free(tmp);
+			tmp = NULL;
 			token_count++;
 		}
 
@@ -139,30 +241,81 @@ int esteh_lexical_parser() {
 				tokens[token_count]->tkn_val.data.val.llval = atol(tmp);
 			}
 			free(tmp);
+			tmp = NULL;
 			token_count++;
 		}
 
-	// 	if (fmap[i] == '+') {
-	// 		if (token_count > 0 && (tokens[token_count - 1]->tkn_code != T_NUMBER)) {
-
-	// 		}
-	// 	}
+		if (fmap[i] == '+') {
+			if (token_count > 0 && (tokens[token_count - 1]->tkn_code != T_NUMBER)) {
+				
+			}
+		}
 
 	}
 
-	printf("Line: %d\n", lineno);
+	if (tokens[token_count - 1]->tkn_type == t_whitespace) {
+		free(tokens[token_count - 1]);
+		tokens[token_count - 1] = NULL;
+		token_count--;
+	}
+
+	for (uint32_t i = 0; i < token_count; ++i)
+	{
+		TOKEN_DUMPER(tokens[i]);
+	}
+
 
 	return 0;
 }
 
-void token_analyze(char *tkn, esteh_token **token) {
+inline static void escape_char(size_t *cur_stralloc, size_t *cur_strlen, char **tmp, char *fmap, size_t *pos) {
 
-	if (SCMP(tkn, "p") || SCMP(tkn, "print") || SCMP(tkn, "echo")) {
+	#define DMQQ(A,B) \
+		case A: \
+			(*tmp)[*cur_strlen] = B; \
+			(*cur_strlen)++; \
+			(*pos)++; \
+
+	switch (fmap[*pos]) {
+		DMQQ('n', '\n')
+			return;
+		break;
+		DMQQ('t', '\t')
+			return;
+		break;
+		DMQQ('f', '\f')
+			return;
+		break;
+		DMQQ('r', '\r')
+			return;
+		break;
+		DMQQ('v', '\v')
+			return;
+		break;
+		DMQQ('e', '\e')
+			return;
+		break;
+		DMQQ('a', '\a')
+			return;
+		break;
+		DMQQ('b', '\b')
+			return;
+		break;
+	}
+}
+
+void token_analyze(char *tkn, size_t tll, esteh_token **token) {
+
+	if (SNCMP(tkn, "p", tll) || SNCMP(tkn, "print", tll) || SNCMP(tkn, "echo", tll)) {
+		(*token)->tkn_val.nonc.val = NULL;
 		(*token)->tkn_code = T_PRINT;
 		(*token)->tkn_type = t_keyword;
 		return;
 	}
 
-
+	(*token)->tkn_val.nonc.val = (char *)malloc(tll);
+	(*token)->tkn_code = T_NOT_DEFINED_YET;
+	(*token)->tkn_type = t_symbol;
+	memcpy((*token)->tkn_val.nonc.val, tkn, tll);
 	return;
-};
+}

@@ -9,8 +9,8 @@
 #define ESTEH_TOKEN_FIRST_ALLOC (sizeof(esteh_token *) * 50)
 
 #define T_NOT_DEFINED_YET 0
-
 #define T_PRINT 100
+#define T_SEMICOLON 130
 #define T_WHITESPACE 150
 
 #define T_NULL 200
@@ -23,7 +23,8 @@ enum token_type {
 	t_symbol = (1 << 1),
 	t_constant = (1 << 2),
 	t_operator = (1 << 3),
-	t_whitespace = (1 << 4)
+	t_whitespace = (1 << 4),
+	t_semicolon = (1 << 5)
 };
 
 enum tea_keywords {

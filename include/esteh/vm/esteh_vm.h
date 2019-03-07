@@ -15,7 +15,7 @@ int esteh_vm(
 );
 int esteh_vm_parse_file(char *filename);
 int esteh_lexical_parser();
-void token_analyze(char *tkn, esteh_token **token);
+void token_analyze(char *tkn, size_t tkn_length, esteh_token **token);
 void esteh_token_clean_up();
 void esteh_vm_shutdown();
 void esteh_vm_end_shutdown();

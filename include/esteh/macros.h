@@ -5,5 +5,6 @@
 #include <string.h>
 
 #define SCMP(A,B) (!strcmp(A,B))
+#define SNCMP(A,B,C) (!strncmp(A,B,C))
 
 #endif
