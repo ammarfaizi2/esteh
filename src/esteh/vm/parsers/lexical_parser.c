@@ -157,7 +157,7 @@ comment_parser:
 						filename,
 						lineno
 					);
-					
+					esteh_vm_shutdown();
 					exit(254);
 				} else {
 					if (fmap[i] == '\n') lineno++;
@@ -218,6 +218,7 @@ t_number_parser:
 							filename,
 							lineno
 						);
+						esteh_vm_shutdown();
 						exit(254);
 					}
 					is_float = true;
@@ -297,10 +298,11 @@ t_number_parser:
 		token_count--;
 	}
 
-	for (uint32_t i = 0; i < token_count; ++i)
-	{
+	#ifdef ESTEH_DEBUG
+	for (uint32_t i = 0; i < token_count; ++i) {
 		TOKEN_DUMPER(tokens[i]);
 	}
+	#endif
 
 
 	return 0;
