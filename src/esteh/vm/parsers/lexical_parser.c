@@ -1,5 +1,4 @@
 
-#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -297,12 +296,6 @@ t_number_parser:
 		tokens[token_count - 1] = NULL;
 		token_count--;
 	}
-
-	#ifdef ESTEH_DEBUG
-	for (uint32_t i = 0; i < token_count; ++i) {
-		TOKEN_DUMPER(tokens[i]);
-	}
-	#endif
 
 
 	return 0;

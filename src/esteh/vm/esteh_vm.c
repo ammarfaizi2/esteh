@@ -7,6 +7,7 @@
 #include <sys/mman.h>
 #include <esteh/vm/esteh_vm.h>
 #include <esteh/vm/esteh_token.h>
+#include <esteh/vm/parsers/tokenizer.h>
 
 // From main.c
 extern char **app_argv; 
@@ -40,6 +41,9 @@ int esteh_vm(
 	munmap(fmap, fmap_size + 3);
 	close(fd);
 
+	if ((exit_code = esteh_token_parser())) {
+		return exit_code;
+	}
 
 	// Clean up the tokens heap.
 	esteh_token_clean_up();

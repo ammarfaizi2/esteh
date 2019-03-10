@@ -3,6 +3,8 @@
 #ifndef ESTEH_VM_DATA_TYPES_H
 #define ESTEH_VM_DATA_TYPES_H
 
+#include <stdlib.h>
+
 #define TEA_NULL 	0
 #define TEA_INTEGER	(1 << 0)
 #define TEA_FLOAT	(1 << 1)

@@ -3,6 +3,7 @@
 #ifndef ESTEH_VM_DEBUGGER_ICETEA_DEBUGGER_H
 #define ESTEH_VM_DEBUGGER_ICETEA_DEBUGGER_H
 
+#include <stdio.h>
 #include <string.h>
 #include <stdint.h>
 #include <unistd.h>
