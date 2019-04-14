@@ -1,5 +1,9 @@
 
 #include <esteh/usage.h>
+#include <esteh/argv_parser/parser.h>
+
+int app_argc = 1;
+char **app_argv;
 
 int main(int argc, char *argv[])
 {	
@@ -8,6 +12,7 @@ int main(int argc, char *argv[])
 		exit(0);
 	}
 
+	argv_parser(argc, argv);
 
 	return 0;
 }
