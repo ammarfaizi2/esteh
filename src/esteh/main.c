@@ -1,5 +1,6 @@
 
 #include <esteh/usage.h>
+#include <esteh/vm/estehvm.h>
 #include <esteh/argv_parser/parser.h>
 
 int app_argc = 1;
@@ -20,7 +21,7 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	printf("%s\n", filename);
+	estehvm();
 
 	return 0;
 }
