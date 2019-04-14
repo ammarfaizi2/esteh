@@ -8,10 +8,8 @@ extern uint32_t token_count;
 extern size_t token_cur_size;
 
 int esteh_token_parser() {
-	#ifdef ESTEH_DEBUG
 	for (uint32_t i = 0; i < token_count; ++i) {
-		TOKEN_DUMPER(tokens[i]);
+		
 	}
-	#endif
 	return 0;
 }

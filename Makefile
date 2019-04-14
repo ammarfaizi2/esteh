@@ -9,7 +9,7 @@ TARGET_BIN = ${ROOT_DIR}/${BIN_NAME}
 INC = -I${ROOT_DIR}/include
 SRC = ${ROOT_DIR}/src
 
-_COMPILER_FLAGS = -Wall -c ${INC} -fpic
+_COMPILER_FLAGS = -Wall -c ${INC}
 LINKER_FLAGS = -Wall
 
 ifneq (${DEBUG_MODE},0)

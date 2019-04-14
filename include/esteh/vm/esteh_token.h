@@ -1,7 +1,7 @@
 
 
-#ifndef ESTEH_VM_TOKEN_H
-#define ESTEH_VM_TOKEN_H
+#ifndef ESTEH_VM_ESTEH_TOKEN_H
+#define ESTEH_VM_ESTEH_TOKEN_H
 
 #include <stdint.h>
 #include <esteh/vm/data_types.h>
