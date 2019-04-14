@@ -4,6 +4,7 @@
 
 int app_argc = 1;
 char **app_argv;
+char *filename = NULL;
 
 int main(int argc, char *argv[])
 {	
@@ -13,6 +14,13 @@ int main(int argc, char *argv[])
 	}
 
 	argv_parser(argc, argv);
+
+	if (filename == NULL) {
+		printf("Missing filename!\n");
+		exit(1);
+	}
+
+	printf("%s\n", filename);
 
 	return 0;
 }
