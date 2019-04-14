@@ -1,6 +1,11 @@
 
 #include <esteh/vm/estehvm.h>
 
-void esteh_vm_lexical() {
-	
+extern char *fmap;
+extern size_t fmap_size;
+
+void vm_lexical() {
+	for (int i = 0; i < fmap_size; ++i) {
+		printf("%c", fmap[i]);
+	}
 }
