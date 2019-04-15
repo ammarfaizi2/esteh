@@ -1,4 +1,8 @@
 
+#include <sys/stat.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+#include <sys/types.h>
 #include <esteh/vm/estehvm.h>
 
 extern char *filename;
@@ -7,9 +11,11 @@ int filefd;
 size_t fmap_size = 0;
 char *fmap;
 
-void estehvm() {
+int estehvm() {
 	vm_openfile();
 	vm_lexical();
+	vm_token_clean_up();
+	return 0;
 }
 
 void vm_openfile() {
@@ -17,13 +23,13 @@ void vm_openfile() {
 
 	if (filefd == -1) {
 		printf("Could not open input file: \"%s\"\n", filename);
-		return;
+		exit(1);
 	}
 
 	struct stat st;
 	if (fstat(filefd, &st) == -1) {
 		printf("Could not open input file: \"%s\"\n", filename);
-		return;
+		exit(1);
 	}
 
 	fmap_size = st.st_size;

@@ -1,19 +1,16 @@
 
-#ifndef ESTEH_VM_ESTEHVM
-#define ESTEH_VM_ESTEHVM
+#ifndef ESTEH__VM__ESTEHVM_H
+#define ESTEH__VM__ESTEHVM_H
 
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <unistd.h>
-#include <sys/stat.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
-#include <sys/types.h>
 
-void estehvm();
+int estehvm();
 void vm_openfile();
-
+void vm_token_clean_up();
 void vm_lexical();
 
 #endif

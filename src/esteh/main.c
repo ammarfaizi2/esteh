@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	estehvm();
+	exit(estehvm());
 
 	return 0;
 }

@@ -1,6 +1,6 @@
 
-#ifndef ESTEH_USAGE_H
-#define ESTEH_USAGE_H
+#ifndef ESTEH__USAGE_H
+#define ESTEH__USAGE_H
 
 #include <stdio.h>
 #include <stdlib.h>
