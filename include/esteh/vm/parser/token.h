@@ -17,7 +17,7 @@ enum _token_type {
 typedef struct _tea_token {
 	char *token;
 	uint32_t lineno;
-	uint32_t token_size;
+	size_t token_size;
 	enum _token_type token_type;
 } tea_token;
 

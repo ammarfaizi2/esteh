@@ -1,4 +1,5 @@
 
+#include <stdio.h>
 #include <stdarg.h>
 #include <esteh/vm/buffer/buffer.h>
 #include <esteh/vm/buffer/helpers.h>
@@ -19,4 +20,7 @@ size_t esteh_printf(const char *format, ...) {
     va_end(args);
 
     free(buffer);
+    buffer = NULL;
+
+    return needed;
 }

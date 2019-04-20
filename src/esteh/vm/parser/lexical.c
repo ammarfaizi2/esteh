@@ -40,7 +40,10 @@ uint32_t esteh_vm_lexical_analyze(char *fmap, size_t fmap_size, tea_token **toke
 			// Multi lines comment.
 			if (fmap[i + 1] == '*') {
 				i += 2;
-				while ((i < fmap_size) && (!((fmap[i] == '*') && (fmap[i + 1] == '/')))) {
+				while (
+					(i < fmap_size) && 
+					(!((fmap[i] == '*') && (fmap[i + 1] == '/')))
+				) {
 					i++;
 					if (fmap[i] == '\n') lineno++;
 				}
@@ -53,9 +56,8 @@ uint32_t esteh_vm_lexical_analyze(char *fmap, size_t fmap_size, tea_token **toke
 				lineno++;
 			}
 
-			i++;
 			token[0] = ' ';
-			goto ut_whitespace;
+			continue;
 		}
 
 		// ut_constant parser
@@ -97,6 +99,7 @@ uint32_t esteh_vm_lexical_analyze(char *fmap, size_t fmap_size, tea_token **toke
 			tokens[tokens_ptr]->token_type = ut_constant;
 			tokens[tokens_ptr]->lineno = lineno;
 			tokens[tokens_ptr]->token = (char *)malloc(token_ptr);
+			tokens[tokens_ptr]->token_size = token_ptr;
 			memcpy(tokens[tokens_ptr]->token, token, token_ptr);
 
 			tokens_ptr++;
@@ -131,6 +134,7 @@ uint32_t esteh_vm_lexical_analyze(char *fmap, size_t fmap_size, tea_token **toke
 			tokens[tokens_ptr]->token_type = ut_string;
 			tokens[tokens_ptr]->lineno = lineno;
 			tokens[tokens_ptr]->token = (char *)malloc(token_ptr);
+			tokens[tokens_ptr]->token_size = token_ptr;
 			memcpy(tokens[tokens_ptr]->token, token, token_ptr);
 			tokens_ptr++;
 			free(token);
@@ -144,6 +148,7 @@ ut_whitespace:
 		tokens[tokens_ptr]->token_type = ut_whitespace;
 		tokens[tokens_ptr]->lineno = lineno;
 		tokens[tokens_ptr]->token = (char *)malloc(token_ptr);
+		tokens[tokens_ptr]->token_size = token_ptr;
 		memcpy(tokens[tokens_ptr]->token, token, token_ptr);
 		tokens_ptr++;
 

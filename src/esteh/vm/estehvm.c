@@ -20,7 +20,8 @@ int esteh_vm_init() {
 int esteh_vm_shutdown() {
 	flush_stdout_buffer();
 	flush_stderr_buffer();
-
+	clean_up_stdout_buffer();
+	clean_up_stderr_buffer();
 	return 0;
 }
 
@@ -49,6 +50,8 @@ int esteh_vm_execute() {
 	token_amount = esteh_vm_lexical_analyze(fmap, fmap_size, tokens);
 
 	esteh_token_dumper(tokens, token_amount);
+
+	esteh_vm_token_clean_up(&tokens, token_amount);
 
 	return 0;
 }

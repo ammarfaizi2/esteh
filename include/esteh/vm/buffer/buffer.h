@@ -12,5 +12,7 @@ void add_stdout_buffer(char *data, size_t size);
 void add_stderr_buffer(char *data, size_t size);
 void flush_stdout_buffer();
 void flush_stderr_buffer();
+void clean_up_stdout_buffer();
+void clean_up_stderr_buffer();
 
 #endif

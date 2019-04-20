@@ -36,3 +36,7 @@ void add_stdout_buffer(char *data, size_t size) {
 		stdout_buffer_ptr += size;
 	}
 }
+
+void clean_up_stdout_buffer() {
+	free(stdout_buffer);
+}
