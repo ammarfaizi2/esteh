@@ -9,8 +9,6 @@
 #include <unistd.h>
 
 int estehvm();
-void vm_openfile();
-void vm_token_clean_up();
-void vm_lexical();
+void *esteh_vm_openfile(char *filename, size_t *filesize, int *filefd);
 
 #endif

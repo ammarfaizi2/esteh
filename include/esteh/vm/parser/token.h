@@ -20,4 +20,9 @@ typedef struct _tea_token {
 	enum _token_type token_type;
 } tea_token;
 
+void esteh_vm_token_clean_up(tea_token ***tokens, uint32_t amount);
+uint32_t esteh_vm_lexical_analyze(char *fmap, size_t fmap_size, tea_token **tokens);
+
+#define TOKENS_CYCLE_ALLOC (sizeof(tea_token) * 30)
+
 #endif

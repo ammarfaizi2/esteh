@@ -7,37 +7,17 @@
 extern char *fmap;
 extern size_t fmap_size;
 
-tea_token **tokens;
-uint32_t tokens_ptr = 0;
-
-void vm_token_clean_up() {
-	for (int i = 0; i < tokens_ptr; ++i) {
-		if (tokens[i] != NULL) {
-			if (tokens[i]->token != NULL) {
-				free(tokens[i]->token);
-			}
-			free(tokens[i]);
-		}
-	}
-	free(tokens);
-}
-
-void vm_lexical() {
+/**
+ * @return Token size.
+ */
+uint32_t esteh_vm_lexical_analyze(char *fmap, size_t fmap_size, tea_token **tokens) {
 
 	uint32_t lineno = 1;
-	size_t used_fmap_size = fmap_size - 3;
+	uint32_t tokens_ptr = 0;
 
-	// Init tokens memory allocation.
-	size_t allocated_tokens_size = sizeof(tea_token) * 30;
-	tokens = (tea_token **)malloc(allocated_tokens_size);
+	size_t allocated_tokens_size = TOKENS_CYCLE_ALLOC;
 
-	#define TOKENS_REALLOC \
-		if (allocated_tokens_size <= (tokens_ptr * (sizeof(tea_token)))) { \
-			allocated_tokens_size += sizeof(tea_token) * 30; \
-			tokens = (tea_token **)realloc(); \
-		}
-
-	for (size_t i = 0; i < used_fmap_size; ++i) {
+	for (size_t i = 0; i < fmap_size; ++i) {
 
 		char token[1];
 		size_t token_ptr = 1;
@@ -60,7 +40,7 @@ void vm_lexical() {
 			// Multi lines comment.
 			if (fmap[i + 1] == '*') {
 				i += 2;
-				while ((i < used_fmap_size) && (!((fmap[i] == '*') && (fmap[i + 1] == '/')))) {
+				while ((i < fmap_size) && (!((fmap[i] == '*') && (fmap[i + 1] == '/')))) {
 					i++;
 					if (fmap[i] == '\n') lineno++;
 				}
@@ -69,7 +49,7 @@ void vm_lexical() {
 			// Singeline comment.
 			if (fmap[i + 1] == '/') {
 				i += 2;
-				while ((i < used_fmap_size) && fmap[i] != '\n')	i++;
+				while ((i < fmap_size) && fmap[i] != '\n')	i++;
 				lineno++;
 			}
 
@@ -95,7 +75,7 @@ void vm_lexical() {
 			i++;
 
 			while(
-				(i < used_fmap_size) && (
+				(i < fmap_size) && (
 					((fmap[i] >= 'a') && (fmap[i] <= 'z')) ||
 					((fmap[i] >= 'A') && (fmap[i] <= 'Z')) ||
 					((fmap[i] >= '0') && (fmap[i] <= '9')) ||
@@ -136,7 +116,7 @@ void vm_lexical() {
 			token_ptr++;
 			i++;
 
-			while((i < used_fmap_size) && (fmap[i] != '"')) {
+			while((i < fmap_size) && (fmap[i] != '"')) {
 				if (allocated_token_size <= token_ptr) {
 					allocated_token_size += 10;
 					token = (char *)realloc(token, allocated_token_size);
@@ -157,8 +137,8 @@ void vm_lexical() {
 			token = NULL;
 		}
 
-
-		continue;
+		goto realloc_check;
+	
 ut_whitespace:
 		tokens[tokens_ptr] = (tea_token *)malloc(sizeof(tea_token));
 		tokens[tokens_ptr]->token_type = ut_whitespace;
@@ -166,8 +146,25 @@ ut_whitespace:
 		tokens[tokens_ptr]->token = (char *)malloc(token_ptr);
 		memcpy(tokens[tokens_ptr]->token, token, token_ptr);
 		tokens_ptr++;
+
+realloc_check:
+		if (allocated_tokens_size <= (tokens_ptr * (sizeof(tea_token)))) { \
+			allocated_tokens_size += TOKENS_CYCLE_ALLOC; \
+			tokens = (tea_token **)realloc(tokens, allocated_tokens_size); \
+		}
 	}
 
+	return tokens_ptr;
+}
 
-	esteh_token_dumper(tokens, tokens_ptr);
+void esteh_vm_token_clean_up(tea_token ***tokens, uint32_t amount) {
+	for (int i = 0; i < amount; ++i) {
+		if ((*tokens)[i] != NULL) {
+			if ((*tokens)[i]->token != NULL) {
+				free((*tokens)[i]->token);
+			}
+			free((*tokens)[i]);
+		}
+	}
+	free(*tokens);
 }
