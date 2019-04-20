@@ -30,7 +30,7 @@ const char *esteh_token_type(enum _token_type type) {
 }
 
 void esteh_token_dumper(tea_token **tokens, uint32_t token_amount) {
-	for (int i = 0; i < token_amount; ++i) {
+	for (uint32_t i = 0; i < token_amount; ++i) {
 		if (tokens[i] != NULL) {
 			esteh_printf("=============================\n");
 			esteh_printf("token_type : %s\n", esteh_token_type(tokens[i]->token_type));
