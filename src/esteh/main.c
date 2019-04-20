@@ -1,6 +1,7 @@
 
 #include <esteh/usage.h>
 #include <esteh/vm/estehvm.h>
+#include <esteh/vm/buffer/buffer.h>
 #include <esteh/argv_parser/parser.h>
 
 int app_argc = 1;
