@@ -4,6 +4,6 @@
 
 #include <esteh/vm/buffer/buffer.h>
 
-void esteh_printf(char *format, ...);
+size_t esteh_printf(const char *format, ...);
 
 #endif
