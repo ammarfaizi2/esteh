@@ -69,6 +69,66 @@ uint32_t esteh_vm_lexical_analyze(char *fmap, size_t fmap_size, tea_token **toke
 			continue;
 		}
 
+		if (
+			(
+				// 33 <= c <= 47
+				(fmap[i] >= '!' && fmap[i] <= '/') ||
+
+				// 58 <= c <= 64
+				(fmap[i] >= ':' && fmap[i] <= '@') ||
+
+				// 91 <= c <= 96
+				(fmap[i] >= '[' && fmap[i] <= '`') ||
+
+				// 123 <= c <= 127
+				(fmap[i] == '{' && fmap[i] <= '~')
+			) && (fmap[i] != '"')
+		) {
+			uint32_t token_ptr  = 0;
+			uint32_t allocated_token_size = sizeof(char) * 10;
+
+			char *token = (char *)malloc(allocated_token_size);
+			token[token_ptr] = fmap[i];
+			token_ptr++;
+			i++;
+
+			while(
+				(i < fmap_size) && (
+					// 33 <= c <= 47
+					(fmap[i] >= '!' && fmap[i] <= '/') ||
+
+					// 58 <= c <= 64
+					(fmap[i] >= ':' && fmap[i] <= '@') ||
+
+					// 91 <= c <= 96
+					(fmap[i] >= '[' && fmap[i] <= '`') ||
+
+					// 123 <= c <= 127
+					(fmap[i] == '{' && fmap[i] <= '~')
+				) && (fmap[i] != '"')
+			) {
+				if (allocated_token_size <= token_ptr) {
+					allocated_token_size += 10;
+					token = (char *)realloc(token, allocated_token_size);
+				}
+
+				token[token_ptr] = fmap[i];
+				token_ptr++;
+				i++;
+			}
+
+			tokens[tokens_ptr] = (tea_token *)malloc(sizeof(tea_token));
+			tokens[tokens_ptr]->token_type = ut_symbol;
+			tokens[tokens_ptr]->lineno = lineno;
+			tokens[tokens_ptr]->token = (char *)malloc(token_ptr);
+			tokens[tokens_ptr]->token_size = token_ptr;
+			memcpy(tokens[tokens_ptr]->token, token, token_ptr);
+
+			tokens_ptr++;
+			free(token);
+			token = NULL;
+		}
+
 		// ut_constant parser
 		if (
 			((fmap[i] >= 'a') && (fmap[i] <= 'z')) ||

@@ -11,9 +11,6 @@ const char *esteh_token_type(enum _token_type type) {
 		case ut_constant:
 			return "ut_constant";
 		break;
-		case ut_variable:
-			return "ut_variable";
-		break;
 		case ut_symbol:
 			return "ut_symbol";
 		break;

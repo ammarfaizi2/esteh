@@ -6,12 +6,11 @@
 #include <stdint.h>
 
 enum _token_type {
-	ut_whitespace = 0,
-	ut_constant = 1,
-	ut_variable = 2,
-	ut_symbol = 3,
-	ut_string = 4,
-	ut_number = 5
+	ut_whitespace = (1 << 0),
+	ut_constant = (1 << 1),
+	ut_symbol = (1 << 2),
+	ut_string = (1 << 3),
+	ut_number = (1 << 4)
 };
 
 typedef struct _tea_token {
