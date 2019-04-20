@@ -75,7 +75,6 @@ void esteh_vm_token_clean_up(tea_token ***tokens, uint32_t amount) {
 
 
 inline static bool comment_parser(tea_token **tokens, char *fmap, size_t fmap_size, uint32_t *tokens_ptr, uint32_t *lineno, size_t *i) {
-	// Comment parsers.
 	if (fmap[(*i)] == '/') {
 		char token[1];
 
@@ -102,12 +101,13 @@ inline static bool comment_parser(tea_token **tokens, char *fmap, size_t fmap_si
 			return true;
 		}
 		token[0] = ' ';
+		token[1] = '\0';
 		tokens[(*tokens_ptr)] = (tea_token *)malloc(sizeof(tea_token));
 		tokens[(*tokens_ptr)]->token_type = ut_whitespace;
 		tokens[(*tokens_ptr)]->lineno = (*lineno);
-		tokens[(*tokens_ptr)]->token = (char *)malloc(1);
-		tokens[(*tokens_ptr)]->token_size = 1;
-		memcpy(tokens[(*tokens_ptr)]->token, token, 1);
+		tokens[(*tokens_ptr)]->token = (char *)malloc(2);
+		tokens[(*tokens_ptr)]->token_size = 2;
+		memcpy(tokens[(*tokens_ptr)]->token, token, 2);
 		(*tokens_ptr)++;
 		return true;
 	}
@@ -115,7 +115,6 @@ inline static bool comment_parser(tea_token **tokens, char *fmap, size_t fmap_si
 }
 
 inline static bool ut_string_parser(tea_token **tokens, char *fmap, size_t fmap_size, uint32_t *tokens_ptr, uint32_t *lineno, size_t *i) {
-	// ut_string parser
 	if (fmap[(*i)] == '"') {
 		(*i)++;
 
@@ -138,12 +137,13 @@ inline static bool ut_string_parser(tea_token **tokens, char *fmap, size_t fmap_
 			(*i)++;
 		}
 
+		token[token_ptr] = '\0';
 		tokens[(*tokens_ptr)] = (tea_token *)malloc(sizeof(tea_token));
 		tokens[(*tokens_ptr)]->token_type = ut_string;
 		tokens[(*tokens_ptr)]->lineno = (*lineno);
-		tokens[(*tokens_ptr)]->token = (char *)malloc(token_ptr);
-		tokens[(*tokens_ptr)]->token_size = token_ptr;
-		memcpy(tokens[(*tokens_ptr)]->token, token, token_ptr);
+		tokens[(*tokens_ptr)]->token = (char *)malloc(token_ptr + 1);
+		tokens[(*tokens_ptr)]->token_size = token_ptr + 1;
+		memcpy(tokens[(*tokens_ptr)]->token, token, token_ptr + 1);
 		(*tokens_ptr)++;
 		free(token);
 		token = NULL;
@@ -202,12 +202,13 @@ inline static bool ut_symbol_parser(tea_token **tokens, char *fmap, size_t fmap_
 			(*i)++;
 		}
 
+		token[token_ptr] = '\0';
 		tokens[(*tokens_ptr)] = (tea_token *)malloc(sizeof(tea_token));
 		tokens[(*tokens_ptr)]->token_type = ut_symbol;
 		tokens[(*tokens_ptr)]->lineno = (*lineno);
-		tokens[(*tokens_ptr)]->token = (char *)malloc(token_ptr);
-		tokens[(*tokens_ptr)]->token_size = token_ptr;
-		memcpy(tokens[(*tokens_ptr)]->token, token, token_ptr);
+		tokens[(*tokens_ptr)]->token = (char *)malloc(token_ptr + 1);
+		tokens[(*tokens_ptr)]->token_size = token_ptr + 1;
+		memcpy(tokens[(*tokens_ptr)]->token, token, token_ptr + 1);
 
 		(*tokens_ptr)++;
 		free(token);
@@ -239,12 +240,13 @@ inline static bool ut_number_parser(tea_token **tokens, char *fmap, size_t fmap_
 			(*i)++;
 		}
 
+		token[token_ptr] = '\0';
 		tokens[(*tokens_ptr)] = (tea_token *)malloc(sizeof(tea_token));
 		tokens[(*tokens_ptr)]->token_type = ut_number;
 		tokens[(*tokens_ptr)]->lineno = (*lineno);
-		tokens[(*tokens_ptr)]->token = (char *)malloc(token_ptr);
-		tokens[(*tokens_ptr)]->token_size = token_ptr;
-		memcpy(tokens[(*tokens_ptr)]->token, token, token_ptr);
+		tokens[(*tokens_ptr)]->token = (char *)malloc(token_ptr + 1);
+		tokens[(*tokens_ptr)]->token_size = token_ptr + 1;
+		memcpy(tokens[(*tokens_ptr)]->token, token, token_ptr + 1);
 
 		(*tokens_ptr)++;
 		free(token);
@@ -289,12 +291,13 @@ inline static bool ut_constant_parser(tea_token **tokens, char *fmap, size_t fma
 			(*i)++;
 		}
 
+		token[token_ptr] = '\0';
 		tokens[(*tokens_ptr)] = (tea_token *)malloc(sizeof(tea_token));
 		tokens[(*tokens_ptr)]->token_type = ut_constant;
 		tokens[(*tokens_ptr)]->lineno = (*lineno);
-		tokens[(*tokens_ptr)]->token = (char *)malloc(token_ptr);
-		tokens[(*tokens_ptr)]->token_size = token_ptr;
-		memcpy(tokens[(*tokens_ptr)]->token, token, token_ptr);
+		tokens[(*tokens_ptr)]->token = (char *)malloc(token_ptr + 1);
+		tokens[(*tokens_ptr)]->token_size = token_ptr + 1;
+		memcpy(tokens[(*tokens_ptr)]->token, token, token_ptr + 1);
 
 		(*tokens_ptr)++;
 		free(token);
@@ -316,18 +319,19 @@ inline static bool ut_whitespace_parser(tea_token **tokens, char *fmap, size_t f
 		if (fmap[(*i)] == '\n') {
 			(*lineno)++;
 		}
-		token[0] = fmap[(*i)];
 
 		if (((*tokens_ptr) > 0) && (tokens[(*tokens_ptr) - 1]->token_type == ut_whitespace)) {
 			return true;
 		}
 
+		token[0] = fmap[(*i)];
+		token[0] = '\0';
 		tokens[(*tokens_ptr)] = (tea_token *)malloc(sizeof(tea_token));
 		tokens[(*tokens_ptr)]->token_type = ut_symbol;
 		tokens[(*tokens_ptr)]->lineno = (*lineno);
-		tokens[(*tokens_ptr)]->token = (char *)malloc(1);
-		tokens[(*tokens_ptr)]->token_size = 1;
-		memcpy(tokens[(*tokens_ptr)]->token, token, 1);
+		tokens[(*tokens_ptr)]->token = (char *)malloc(2);
+		tokens[(*tokens_ptr)]->token_size = 2;
+		memcpy(tokens[(*tokens_ptr)]->token, token, 2);
 		return true;
 	}
 }
