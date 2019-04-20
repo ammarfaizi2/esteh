@@ -1,11 +1,19 @@
 
 #include <string.h>
+#include <stdbool.h>
 #include <esteh/vm/estehvm.h>
 #include <esteh/vm/parser/token.h>
 #include <esteh/vm/debugger/token_dumper.h>
 
 extern char *fmap;
 extern size_t fmap_size;
+
+inline static bool comment_parser(tea_token **tokens, char *fmap, size_t fmap_size, uint32_t *tokens_ptr, uint32_t *lineno, size_t *i);
+inline static bool ut_string_parser(tea_token **tokens, char *fmap, size_t fmap_size, uint32_t *tokens_ptr, uint32_t *lineno, size_t *i);
+inline static bool ut_symbol_parser(tea_token **tokens, char *fmap, size_t fmap_size, uint32_t *tokens_ptr, uint32_t *lineno, size_t *i);
+inline static bool ut_number_parser(tea_token **tokens, char *fmap, size_t fmap_size, uint32_t *tokens_ptr, uint32_t *lineno, size_t *i);
+inline static bool ut_constant_parser(tea_token **tokens, char *fmap, size_t fmap_size, uint32_t *tokens_ptr, uint32_t *lineno, size_t *i);
+inline static bool ut_whitespace_parser(tea_token **tokens, char *fmap, size_t fmap_size, uint32_t *tokens_ptr, uint32_t *lineno, size_t *i);
 
 /**
  * @return Token size.
@@ -19,241 +27,25 @@ uint32_t esteh_vm_lexical_analyze(char *fmap, size_t fmap_size, tea_token **toke
 
 	for (size_t i = 0; i < fmap_size; ++i) {
 
-		char token[1];
-		size_t token_ptr = 1;
-
-		if (
-			(fmap[i] == '\n') ||
-			(fmap[i] == ' ')  ||
-			(fmap[i] == '\r') ||
-			(fmap[i] == '\t')
-		) {
-			if (fmap[i] == '\n') {
-				lineno++;
-			}
-			token[0] = fmap[i];
-
-			if ((tokens_ptr > 0) && (tokens[tokens_ptr - 1]->token_type == ut_whitespace)) {
-				continue;
-			}
-
-			goto ut_whitespace;
+		if (comment_parser(tokens, fmap, fmap_size, &tokens_ptr, &lineno, &i)) {
+			goto realloc_check;
+		}
+		
+		if (ut_symbol_parser(tokens, fmap, fmap_size, &tokens_ptr, &lineno, &i)) {
+			goto realloc_check;
 		}
 
-		// Comment parsers.
-		if (fmap[i] == '/') {
-			// Multi lines comment.
-			if (fmap[i + 1] == '*') {
-				i += 2;
-				while (
-					(i < fmap_size) && 
-					(!((fmap[i] == '*') && (fmap[i + 1] == '/')))
-				) {
-					i++;
-					if (fmap[i] == '\n') lineno++;
-				}
-			}
-
-			// Singeline comment.
-			if (fmap[i + 1] == '/') {
-				i += 2;
-				while ((i < fmap_size) && fmap[i] != '\n')	i++;
-				lineno++;
-			}
-
-			if ((tokens_ptr > 0) && (tokens[tokens_ptr - 1]->token_type == ut_whitespace)) {
-				continue;
-			}
-
-			token[0] = ' ';
-			continue;
+		if (ut_constant_parser(tokens, fmap, fmap_size, &tokens_ptr, &lineno, &i)) {
+			goto realloc_check;
+		}
+		
+		if (ut_number_parser(tokens, fmap, fmap_size, &tokens_ptr, &lineno, &i)) {
+			goto realloc_check;
 		}
 
-		if (
-			(
-				// 33 <= c <= 47
-				(fmap[i] >= '!' && fmap[i] <= '/') ||
-
-				// 58 <= c <= 64
-				(fmap[i] >= ':' && fmap[i] <= '@') ||
-
-				// 91 <= c <= 96
-				(fmap[i] >= '[' && fmap[i] <= '`') ||
-
-				// 123 <= c <= 127
-				(fmap[i] == '{' && fmap[i] <= '~')
-			) && (fmap[i] != '"')
-		) {
-			uint32_t token_ptr  = 0;
-			uint32_t allocated_token_size = sizeof(char) * 10;
-
-			char *token = (char *)malloc(allocated_token_size);
-			token[token_ptr] = fmap[i];
-			token_ptr++;
-			i++;
-
-			while(
-				(i < fmap_size) && (
-					// 33 <= c <= 47
-					(fmap[i] >= '!' && fmap[i] <= '/') ||
-
-					// 58 <= c <= 64
-					(fmap[i] >= ':' && fmap[i] <= '@') ||
-
-					// 91 <= c <= 96
-					(fmap[i] >= '[' && fmap[i] <= '`') ||
-
-					// 123 <= c <= 127
-					(fmap[i] == '{' && fmap[i] <= '~')
-				) && (fmap[i] != '"')
-			) {
-				if (allocated_token_size <= token_ptr) {
-					allocated_token_size += 10;
-					token = (char *)realloc(token, allocated_token_size);
-				}
-
-				token[token_ptr] = fmap[i];
-				token_ptr++;
-				i++;
-			}
-
-			tokens[tokens_ptr] = (tea_token *)malloc(sizeof(tea_token));
-			tokens[tokens_ptr]->token_type = ut_symbol;
-			tokens[tokens_ptr]->lineno = lineno;
-			tokens[tokens_ptr]->token = (char *)malloc(token_ptr);
-			tokens[tokens_ptr]->token_size = token_ptr;
-			memcpy(tokens[tokens_ptr]->token, token, token_ptr);
-
-			tokens_ptr++;
-			free(token);
-			token = NULL;
+		if (ut_string_parser(tokens, fmap, fmap_size, &tokens_ptr, &lineno, &i)) {
+			goto realloc_check;
 		}
-
-		// ut_constant parser
-		if (
-			((fmap[i] >= 'a') && (fmap[i] <= 'z')) ||
-			((fmap[i] >= 'A') && (fmap[i] <= 'Z')) ||
-			(fmap[i] >= 128) ||
-			(fmap[i] == '_')
-		) {
-
-			uint32_t token_ptr  = 0;
-			uint32_t allocated_token_size = sizeof(char) * 10;
-
-			char *token = (char *)malloc(allocated_token_size);
-			token[token_ptr] = fmap[i];
-			token_ptr++;
-			i++;
-
-			while(
-				(i < fmap_size) && (
-					((fmap[i] >= 'a') && (fmap[i] <= 'z')) ||
-					((fmap[i] >= 'A') && (fmap[i] <= 'Z')) ||
-					((fmap[i] >= '0') && (fmap[i] <= '9')) ||
-					(fmap[i] >= 128) ||
-					(fmap[i] == '_')
-				)
-			) {
-				if (allocated_token_size <= token_ptr) {
-					allocated_token_size += 10;
-					token = (char *)realloc(token, allocated_token_size);
-				}
-
-				token[token_ptr] = fmap[i];
-				token_ptr++;
-				i++;
-			}
-
-			tokens[tokens_ptr] = (tea_token *)malloc(sizeof(tea_token));
-			tokens[tokens_ptr]->token_type = ut_constant;
-			tokens[tokens_ptr]->lineno = lineno;
-			tokens[tokens_ptr]->token = (char *)malloc(token_ptr);
-			tokens[tokens_ptr]->token_size = token_ptr;
-			memcpy(tokens[tokens_ptr]->token, token, token_ptr);
-
-			tokens_ptr++;
-			free(token);
-			token = NULL;
-		}
-
-		// ut_number parser
-		if (fmap[i] >= '0' && fmap[i] <= '9') {
-
-			uint32_t token_ptr  = 0;
-			uint32_t allocated_token_size = sizeof(char) * 10;
-
-			char *token = (char *)malloc(allocated_token_size);
-			token[token_ptr] = fmap[i];
-			token_ptr++;
-			i++;
-
-			while((i < fmap_size) && ((fmap[i] >= '0') && (fmap[i] <= '9'))) {
-				if (allocated_token_size <= token_ptr) {
-					allocated_token_size += 10;
-					token = (char *)realloc(token, allocated_token_size);
-				}
-
-				token[token_ptr] = fmap[i];
-				token_ptr++;
-				i++;
-			}
-
-			tokens[tokens_ptr] = (tea_token *)malloc(sizeof(tea_token));
-			tokens[tokens_ptr]->token_type = ut_number;
-			tokens[tokens_ptr]->lineno = lineno;
-			tokens[tokens_ptr]->token = (char *)malloc(token_ptr);
-			tokens[tokens_ptr]->token_size = token_ptr;
-			memcpy(tokens[tokens_ptr]->token, token, token_ptr);
-
-			tokens_ptr++;
-			free(token);
-			token = NULL;
-		}
-
-		// ut_string parser
-		if (fmap[i] == '"') {
-			i++;
-
-			uint32_t token_ptr  = 0;
-			uint32_t allocated_token_size = sizeof(char) * 10;
-
-			char *token = (char *)malloc(allocated_token_size);
-			token[token_ptr] = fmap[i];
-			token_ptr++;
-			i++;
-
-			while((i < fmap_size) && (fmap[i] != '"')) {
-				if (allocated_token_size <= token_ptr) {
-					allocated_token_size += 10;
-					token = (char *)realloc(token, allocated_token_size);
-				}
-
-				token[token_ptr] = fmap[i];
-				token_ptr++;
-				i++;
-			}
-
-			tokens[tokens_ptr] = (tea_token *)malloc(sizeof(tea_token));
-			tokens[tokens_ptr]->token_type = ut_string;
-			tokens[tokens_ptr]->lineno = lineno;
-			tokens[tokens_ptr]->token = (char *)malloc(token_ptr);
-			tokens[tokens_ptr]->token_size = token_ptr;
-			memcpy(tokens[tokens_ptr]->token, token, token_ptr);
-			tokens_ptr++;
-			free(token);
-			token = NULL;
-		}
-
-		goto realloc_check;
-	
-ut_whitespace:
-		tokens[tokens_ptr] = (tea_token *)malloc(sizeof(tea_token));
-		tokens[tokens_ptr]->token_type = ut_whitespace;
-		tokens[tokens_ptr]->lineno = lineno;
-		tokens[tokens_ptr]->token = (char *)malloc(token_ptr);
-		tokens[tokens_ptr]->token_size = token_ptr;
-		memcpy(tokens[tokens_ptr]->token, token, token_ptr);
-		tokens_ptr++;
 
 realloc_check:
 		if (allocated_tokens_size <= (tokens_ptr * (sizeof(tea_token)))) { \
@@ -278,4 +70,264 @@ void esteh_vm_token_clean_up(tea_token ***tokens, uint32_t amount) {
 	}
 	free(*tokens);
 	*tokens = NULL;
+}
+
+
+
+inline static bool comment_parser(tea_token **tokens, char *fmap, size_t fmap_size, uint32_t *tokens_ptr, uint32_t *lineno, size_t *i) {
+	// Comment parsers.
+	if (fmap[(*i)] == '/') {
+		char token[1];
+
+		// Multi lines comment.
+		if (fmap[(*i) + 1] == '*') {
+			(*i) += 2;
+			while (
+				((*i) < fmap_size) && 
+				(!((fmap[(*i)] == '*') && (fmap[(*i) + 1] == '/')))
+			) {
+				(*i)++;
+				if (fmap[(*i)] == '\n') (*lineno)++;
+			}
+		}
+
+		// Singeline comment.
+		if (fmap[(*i) + 1] == '/') {
+			(*i) += 2;
+			while (((*i) < fmap_size) && fmap[(*i)] != '\n')	(*i)++;
+			(*lineno)++;
+		}
+
+		if (((*tokens_ptr) > 0) && (tokens[(*tokens_ptr) - 1]->token_type == ut_whitespace)) {
+			return true;
+		}
+		token[0] = ' ';
+		tokens[(*tokens_ptr)] = (tea_token *)malloc(sizeof(tea_token));
+		tokens[(*tokens_ptr)]->token_type = ut_whitespace;
+		tokens[(*tokens_ptr)]->lineno = (*lineno);
+		tokens[(*tokens_ptr)]->token = (char *)malloc(1);
+		tokens[(*tokens_ptr)]->token_size = 1;
+		memcpy(tokens[(*tokens_ptr)]->token, token, 1);
+		(*tokens_ptr)++;
+		return true;
+	}
+	return false;
+}
+
+inline static bool ut_string_parser(tea_token **tokens, char *fmap, size_t fmap_size, uint32_t *tokens_ptr, uint32_t *lineno, size_t *i) {
+	// ut_string parser
+	if (fmap[(*i)] == '"') {
+		(*i)++;
+
+		uint32_t token_ptr  = 0;
+		uint32_t allocated_token_size = sizeof(char) * 10;
+
+		char *token = (char *)malloc(allocated_token_size);
+		token[token_ptr] = fmap[(*i)];
+		token_ptr++;
+		(*i)++;
+
+		while(((*i) < fmap_size) && (fmap[(*i)] != '"')) {
+			if (allocated_token_size <= token_ptr) {
+				allocated_token_size += 10;
+				token = (char *)realloc(token, allocated_token_size);
+			}
+
+			token[token_ptr] = fmap[(*i)];
+			token_ptr++;
+			(*i)++;
+		}
+
+		tokens[(*tokens_ptr)] = (tea_token *)malloc(sizeof(tea_token));
+		tokens[(*tokens_ptr)]->token_type = ut_string;
+		tokens[(*tokens_ptr)]->lineno = (*lineno);
+		tokens[(*tokens_ptr)]->token = (char *)malloc(token_ptr);
+		tokens[(*tokens_ptr)]->token_size = token_ptr;
+		memcpy(tokens[(*tokens_ptr)]->token, token, token_ptr);
+		(*tokens_ptr)++;
+		free(token);
+		token = NULL;
+		return true;
+	}
+	return false;
+}
+
+
+inline static bool ut_symbol_parser(tea_token **tokens, char *fmap, size_t fmap_size, uint32_t *tokens_ptr, uint32_t *lineno, size_t *i) {
+	if (
+		(
+			// 33 <= c <= 47
+			(fmap[(*i)] >= '!' && fmap[(*i)] <= '/') ||
+
+			// 58 <= c <= 64
+			(fmap[(*i)] >= ':' && fmap[(*i)] <= '@') ||
+
+			// 91 <= c <= 96
+			(fmap[(*i)] >= '[' && fmap[(*i)] <= '`') ||
+
+			// 123 <= c <= 127
+			(fmap[(*i)] == '{' && fmap[(*i)] <= '~')
+		) && (fmap[(*i)] != '"')
+	) {
+		uint32_t token_ptr  = 0;
+		uint32_t allocated_token_size = sizeof(char) * 10;
+
+		char *token = (char *)malloc(allocated_token_size);
+		token[token_ptr] = fmap[(*i)];
+		token_ptr++;
+		(*i)++;
+
+		while(
+			((*i) < fmap_size) && (
+				// 33 <= c <= 47
+				(fmap[(*i)] >= '!' && fmap[(*i)] <= '/') ||
+
+				// 58 <= c <= 64
+				(fmap[(*i)] >= ':' && fmap[(*i)] <= '@') ||
+
+				// 91 <= c <= 96
+				(fmap[(*i)] >= '[' && fmap[(*i)] <= '`') ||
+
+				// 123 <= c <= 127
+				(fmap[(*i)] == '{' && fmap[(*i)] <= '~')
+			) && (fmap[(*i)] != '"')
+		) {
+			if (allocated_token_size <= token_ptr) {
+				allocated_token_size += 10;
+				token = (char *)realloc(token, allocated_token_size);
+			}
+
+			token[token_ptr] = fmap[(*i)];
+			token_ptr++;
+			(*i)++;
+		}
+
+		tokens[(*tokens_ptr)] = (tea_token *)malloc(sizeof(tea_token));
+		tokens[(*tokens_ptr)]->token_type = ut_symbol;
+		tokens[(*tokens_ptr)]->lineno = (*lineno);
+		tokens[(*tokens_ptr)]->token = (char *)malloc(token_ptr);
+		tokens[(*tokens_ptr)]->token_size = token_ptr;
+		memcpy(tokens[(*tokens_ptr)]->token, token, token_ptr);
+
+		(*tokens_ptr)++;
+		free(token);
+		token = NULL;
+		return true;
+	}
+	return false;
+}
+
+inline static bool ut_number_parser(tea_token **tokens, char *fmap, size_t fmap_size, uint32_t *tokens_ptr, uint32_t *lineno, size_t *i) {
+	if (fmap[(*i)] >= '0' && fmap[(*i)] <= '9') {
+
+		uint32_t token_ptr  = 0;
+		uint32_t allocated_token_size = sizeof(char) * 10;
+
+		char *token = (char *)malloc(allocated_token_size);
+		token[token_ptr] = fmap[(*i)];
+		token_ptr++;
+		(*i)++;
+
+		while(((*i) < fmap_size) && ((fmap[(*i)] >= '0') && (fmap[(*i)] <= '9'))) {
+			if (allocated_token_size <= token_ptr) {
+				allocated_token_size += 10;
+				token = (char *)realloc(token, allocated_token_size);
+			}
+
+			token[token_ptr] = fmap[(*i)];
+			token_ptr++;
+			(*i)++;
+		}
+
+		tokens[(*tokens_ptr)] = (tea_token *)malloc(sizeof(tea_token));
+		tokens[(*tokens_ptr)]->token_type = ut_number;
+		tokens[(*tokens_ptr)]->lineno = (*lineno);
+		tokens[(*tokens_ptr)]->token = (char *)malloc(token_ptr);
+		tokens[(*tokens_ptr)]->token_size = token_ptr;
+		memcpy(tokens[(*tokens_ptr)]->token, token, token_ptr);
+
+		(*tokens_ptr)++;
+		free(token);
+		token = NULL;
+		return true;
+	}
+	return false;
+}
+
+inline static bool ut_constant_parser(tea_token **tokens, char *fmap, size_t fmap_size, uint32_t *tokens_ptr, uint32_t *lineno, size_t *i) {
+	if (
+		((fmap[(*i)] >= 'a') && (fmap[(*i)] <= 'z')) ||
+		((fmap[(*i)] >= 'A') && (fmap[(*i)] <= 'Z')) ||
+		(fmap[(*i)] >= 128) ||
+		(fmap[(*i)] == '_')
+	) {
+
+		uint32_t token_ptr  = 0;
+		uint32_t allocated_token_size = sizeof(char) * 10;
+
+		char *token = (char *)malloc(allocated_token_size);
+		token[token_ptr] = fmap[(*i)];
+		token_ptr++;
+		(*i)++;
+
+		while(
+			((*i) < fmap_size) && (
+				((fmap[(*i)] >= 'a') && (fmap[(*i)] <= 'z')) ||
+				((fmap[(*i)] >= 'A') && (fmap[(*i)] <= 'Z')) ||
+				((fmap[(*i)] >= '0') && (fmap[(*i)] <= '9')) ||
+				(fmap[(*i)] >= 128) ||
+				(fmap[(*i)] == '_')
+			)
+		) {
+			if (allocated_token_size <= token_ptr) {
+				allocated_token_size += 10;
+				token = (char *)realloc(token, allocated_token_size);
+			}
+
+			token[token_ptr] = fmap[(*i)];
+			token_ptr++;
+			(*i)++;
+		}
+
+		tokens[(*tokens_ptr)] = (tea_token *)malloc(sizeof(tea_token));
+		tokens[(*tokens_ptr)]->token_type = ut_constant;
+		tokens[(*tokens_ptr)]->lineno = (*lineno);
+		tokens[(*tokens_ptr)]->token = (char *)malloc(token_ptr);
+		tokens[(*tokens_ptr)]->token_size = token_ptr;
+		memcpy(tokens[(*tokens_ptr)]->token, token, token_ptr);
+
+		(*tokens_ptr)++;
+		free(token);
+		token = NULL;
+		return true;
+	}
+	return false;
+}
+
+inline static bool ut_whitespace_parser(tea_token **tokens, char *fmap, size_t fmap_size, uint32_t *tokens_ptr, uint32_t *lineno, size_t *i) {
+	if (
+		(fmap[(*i)] == '\n') ||
+		(fmap[(*i)] == ' ')  ||
+		(fmap[(*i)] == '\r') ||
+		(fmap[(*i)] == '\t')
+	) {
+		char token[1];
+
+		if (fmap[(*i)] == '\n') {
+			(*lineno)++;
+		}
+		token[0] = fmap[(*i)];
+
+		if (((*tokens_ptr) > 0) && (tokens[(*tokens_ptr) - 1]->token_type == ut_whitespace)) {
+			return true;
+		}
+
+		tokens[(*tokens_ptr)] = (tea_token *)malloc(sizeof(tea_token));
+		tokens[(*tokens_ptr)]->token_type = ut_symbol;
+		tokens[(*tokens_ptr)]->lineno = (*lineno);
+		tokens[(*tokens_ptr)]->token = (char *)malloc(1);
+		tokens[(*tokens_ptr)]->token_size = 1;
+		memcpy(tokens[(*tokens_ptr)]->token, token, 1);
+		return true;
+	}
 }
