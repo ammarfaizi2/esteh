@@ -19,7 +19,11 @@ int estehvm() {
 
 	// Init tokens memory allocation.
 	tokens = (tea_token **)malloc(TOKENS_CYCLE_ALLOC);
+
+	// Open mapped file.
 	fmap = (char *)esteh_vm_openfile(filename, &fmap_size, &filefd);
+
+	// Parse token from file.
 	token_amount = esteh_vm_lexical_analyze(fmap, fmap_size, tokens);
 
 	return 0;
