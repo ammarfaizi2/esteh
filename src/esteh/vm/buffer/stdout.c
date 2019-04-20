@@ -39,4 +39,5 @@ void add_stdout_buffer(char *data, size_t size) {
 
 void clean_up_stdout_buffer() {
 	free(stdout_buffer);
+	stdout_buffer = NULL;
 }

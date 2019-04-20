@@ -39,4 +39,5 @@ void add_stderr_buffer(char *data, size_t size) {
 
 void clean_up_stderr_buffer() {
 	free(stderr_buffer);
+	stderr_buffer = NULL;
 }

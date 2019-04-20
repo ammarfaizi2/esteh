@@ -167,9 +167,12 @@ void esteh_vm_token_clean_up(tea_token ***tokens, uint32_t amount) {
 		if ((*tokens)[i] != NULL) {
 			if ((*tokens)[i]->token != NULL) {
 				free((*tokens)[i]->token);
+				(*tokens)[i]->token = NULL;
 			}
 			free((*tokens)[i]);
+			(*tokens)[i] = NULL;
 		}
 	}
 	free(*tokens);
+	*tokens = NULL;
 }
