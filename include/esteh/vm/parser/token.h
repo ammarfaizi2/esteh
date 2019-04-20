@@ -2,6 +2,7 @@
 #ifndef ESTEH__VM__PARSER__TOKEN_H
 #define ESTEH__VM__PARSER__TOKEN_H
 
+#include <stdlib.h>
 #include <stdint.h>
 
 enum _token_type {

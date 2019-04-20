@@ -11,4 +11,10 @@
 int estehvm();
 void *esteh_vm_openfile(char *filename, size_t *filesize, int *filefd);
 
+int esteh_vm_init();
+int esteh_vm_shutdown();
+int esteh_vm_execute();
+
+
+
 #endif

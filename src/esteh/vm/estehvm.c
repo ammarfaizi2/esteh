@@ -5,11 +5,33 @@
 #include <sys/types.h>
 #include <esteh/vm/estehvm.h>
 #include <esteh/vm/parser/token.h>
+#include <esteh/vm/buffer/buffer.h>
+#include <esteh/vm/debugger/token_dumper.h>
 
 extern char *filename;
 
-int estehvm() {
+int esteh_vm_init() {
+	init_stdout_buffer();
+	init_stderr_buffer();
 
+	return 0;
+}
+
+int esteh_vm_shutdown() {
+	flush_stdout_buffer();
+	flush_stderr_buffer();
+
+	return 0;
+}
+
+int estehvm() {
+	esteh_vm_init();
+	esteh_vm_execute();
+	esteh_vm_shutdown();
+	return 0;
+}
+
+int esteh_vm_execute() {
 	int filefd;
 	size_t fmap_size = 0;
 	char *fmap;
@@ -26,8 +48,11 @@ int estehvm() {
 	// Parse token from file.
 	token_amount = esteh_vm_lexical_analyze(fmap, fmap_size, tokens);
 
+	esteh_token_dumper(tokens, token_amount);
+
 	return 0;
 }
+
 
 void *esteh_vm_openfile(char *filename, size_t *filesize, int *filefd) {
 
