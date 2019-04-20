@@ -5,12 +5,12 @@
 #include <esteh/vm/buffer/helpers.h>
 
 size_t esteh_printf(const char *format, ...) {
-	va_list args;
-	size_t needed; 
-	char *buffer;
+    va_list args;
+    size_t needed; 
+    char *buffer;
 
-	va_start(args, format);
-	needed = vsnprintf(NULL, 0, format, args) + 1;
+    va_start(args, format);
+    needed = vsnprintf(NULL, 0, format, args) + 1;
     buffer = malloc(needed);
     va_end(args);
 
