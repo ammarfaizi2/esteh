@@ -47,6 +47,10 @@ uint32_t esteh_vm_lexical_analyze(char *fmap, size_t fmap_size, tea_token **toke
 			goto realloc_check;
 		}
 
+		if (ut_whitespace_parser(tokens, fmap, fmap_size, &tokens_ptr, &lineno, &i)) {
+			goto realloc_check;
+		}
+
 realloc_check:
 		if (allocated_tokens_size <= (tokens_ptr * (sizeof(tea_token)))) { \
 			allocated_tokens_size += TOKENS_CYCLE_ALLOC; \
@@ -72,11 +76,9 @@ void esteh_vm_token_clean_up(tea_token ***tokens, uint32_t amount) {
 	*tokens = NULL;
 }
 
-
-
 inline static bool comment_parser(tea_token **tokens, char *fmap, size_t fmap_size, uint32_t *tokens_ptr, uint32_t *lineno, size_t *i) {
 	if (fmap[(*i)] == '/') {
-		char token[1];
+		char token[2];
 
 		// Multi lines comment.
 		if (fmap[(*i) + 1] == '*') {
@@ -314,7 +316,7 @@ inline static bool ut_whitespace_parser(tea_token **tokens, char *fmap, size_t f
 		(fmap[(*i)] == '\r') ||
 		(fmap[(*i)] == '\t')
 	) {
-		char token[1];
+		char token[2];
 
 		if (fmap[(*i)] == '\n') {
 			(*lineno)++;
@@ -325,7 +327,7 @@ inline static bool ut_whitespace_parser(tea_token **tokens, char *fmap, size_t f
 		}
 
 		token[0] = fmap[(*i)];
-		token[0] = '\0';
+		token[1] = '\0';
 		tokens[(*tokens_ptr)] = (tea_token *)malloc(sizeof(tea_token));
 		tokens[(*tokens_ptr)]->token_type = ut_symbol;
 		tokens[(*tokens_ptr)]->lineno = (*lineno);
@@ -334,4 +336,5 @@ inline static bool ut_whitespace_parser(tea_token **tokens, char *fmap, size_t f
 		memcpy(tokens[(*tokens_ptr)]->token, token, 2);
 		return true;
 	}
+	return false;
 }
