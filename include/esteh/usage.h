@@ -1,7 +1,10 @@
 
-#ifndef ESTEH_USAGE_H
-#define ESTEH_USAGE_H
+#ifndef ESTEH__USAGE_H
+#define ESTEH__USAGE_H
 
-void esteh_usage(char *appname);
+#include <stdio.h>
+#include <stdlib.h>
+
+void usage(char *appname);
 
 #endif

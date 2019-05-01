@@ -1,7 +1,7 @@
+#!/usr/bin/env php
 <?php
 
 $esteh_bin = escapeshellarg(__DIR__."/esteh");
-
 
 function esteh_test($file)
 {

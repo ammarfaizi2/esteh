@@ -1,7 +1,6 @@
 
-#include <stdio.h>
 #include <esteh/usage.h>
 
-void esteh_usage(char *appname) {
-	fprintf(stdout, "Usage: %s [option] <file>\n", appname);
+void usage(char *appname) {
+	printf("Usage: %s [options] <file> [args...]\n", appname);
 }
