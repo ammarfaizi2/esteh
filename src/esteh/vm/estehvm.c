@@ -49,6 +49,9 @@ int esteh_vm_execute() {
 	// Parse token from file.
 	token_amount = esteh_vm_lexical_analyze(fmap, fmap_size, tokens);
 
+	munmap(fmap, fmap_size + 3);
+	close(filefd);
+
 	esteh_token_dumper(tokens, token_amount);
 
 	esteh_vm_token_clean_up(&tokens, token_amount);
