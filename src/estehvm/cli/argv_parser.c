@@ -26,27 +26,25 @@ bool argv_parser(char **argv, int argc, char **error_message, char **file_name, 
 
 		continue;
 
-
 	get_file_name:
 		*file_name = (char *)malloc(len + 1);
-		memcpy(file_name, argv[i], len);
-		file_name[len] = 0;
+		memcpy(*file_name, argv[i], len);
+		(*file_name)[len] = 0;
 		got_file_name = true;
 
-		*app_argc = argc - i - 1;
-		*app_argv = (char **)malloc(*app_argc);
-		*app_argv[j] = *file_name;
+		*app_argc = argc - i;
+		*app_argv = (char **)malloc(sizeof(char **) * (*app_argc));
+		(*app_argv)[j] = *file_name;
 		j++;
-
 		continue;
 
 	get_app_argv:
-		*app_argv[j] = (char *)malloc(len + 1);
-		memcpy(*app_argv[j], argv[i], len);
-		*app_argv[j][len] = 0;
+		(*app_argv)[j] = (char *)malloc(len + 1);
+		memcpy((*app_argv)[j], argv[i], len);
+		(*app_argv)[j][len] = 0;
 		j++;
-
 		continue;
+
 	}
 
 
