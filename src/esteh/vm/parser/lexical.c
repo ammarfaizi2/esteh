@@ -52,9 +52,9 @@ uint32_t esteh_vm_lexical_analyze(char *fmap, size_t fmap_size, tea_token **toke
 		}
 
 realloc_check:
-		if (allocated_tokens_size <= (tokens_ptr * (sizeof(tea_token)))) { \
-			allocated_tokens_size += TOKENS_CYCLE_ALLOC; \
-			tokens = (tea_token **)realloc(tokens, allocated_tokens_size); \
+		if (allocated_tokens_size <= (tokens_ptr * (sizeof(tea_token)))) {
+			allocated_tokens_size += TOKENS_CYCLE_ALLOC;
+			tokens = (tea_token **)realloc(tokens, allocated_tokens_size);
 		}
 	}
 

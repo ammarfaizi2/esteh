@@ -11,7 +11,7 @@ size_t esteh_printf(const char *format, ...) {
 
     va_start(args, format);
     needed = vsnprintf(NULL, 0, format, args) + 1;
-    buffer = malloc(needed);
+    buffer = (char *)malloc(needed);
     va_end(args);
 
     va_start(args, format);

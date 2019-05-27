@@ -40,5 +40,5 @@ inline static void parse_opt1(char *opt, int *ipt) {
 }
 
 inline static void parse_opt2(char *opt, int *ipt) {
-
+	
 }

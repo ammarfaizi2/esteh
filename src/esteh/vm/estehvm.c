@@ -40,19 +40,16 @@ int esteh_vm_execute() {
 	uint32_t token_amount;
 	tea_token **tokens;
 
-	// Init tokens memory allocation.
 	tokens = (tea_token **)malloc(TOKENS_CYCLE_ALLOC);
-
-	// Open mapped file.
 	fmap = (char *)esteh_vm_openfile(filename, &fmap_size, &filefd);
-
-	// Parse token from file.
 	token_amount = esteh_vm_lexical_analyze(fmap, fmap_size, tokens);
 
 	munmap(fmap, fmap_size + 3);
 	close(filefd);
 
-	esteh_token_dumper(tokens, token_amount);
+	esteh_vm_syntax_analyze(tokens, token_amount);
+
+	// esteh_token_dumper(tokens, token_amount);
 
 	esteh_vm_token_clean_up(&tokens, token_amount);
 
