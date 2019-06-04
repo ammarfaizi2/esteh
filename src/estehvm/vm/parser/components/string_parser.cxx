@@ -25,8 +25,8 @@ if ($c[i] == '"') {
 		_skip_set:
 		i++;
 	}
-	
-	printf("ll : %d\n", string_len);
+
+	string[string_len] = '\0';
+
 	SET_TOKEN_NP(t_string, string, string_len + 1, lineno);
-	$t[$ti - 1]->body[string_len] = '\0';
 }
