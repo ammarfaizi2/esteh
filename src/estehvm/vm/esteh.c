@@ -35,11 +35,13 @@ uint8_t esteh_vm_run_file(char *file_name, int app_argc, char **app_argv) {
 
 	if (fd == -1) {
 		esteh_err_printf("Could not open input file: %s\n", file_name);
+		exit_code = 1;
 		goto shutdown;
 	}
 
 	if (fstat(fd, &st) == -1) {
 		esteh_err_printf("Could not stat input file: %s\n", file_name);
+		exit_code = 1;
 		goto shutdown;
 	}
 
@@ -47,6 +49,7 @@ uint8_t esteh_vm_run_file(char *file_name, int app_argc, char **app_argv) {
 	fmap = (char *)mmap(NULL, fsize + 4, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
 
 	token_count = esteh_vm_lexical_analyze(fmap, fsize, &tokens, &lexical_error, &lexical_error_message);
+	esteh_vm_tokenizer(&tokens, token_count);
 
 	if (lexical_error) {
 		esteh_err_printf("Parse Error: %s\n", lexical_error_message);
