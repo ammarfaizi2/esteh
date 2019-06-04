@@ -22,9 +22,9 @@ bool argv_parser(char **argv, int argc, char **error_message, char **file_name, 
 
 		if (argv[i][0] == '-') {
 			if (len == 1) goto get_file_name;
-		}
 
-		continue;
+			continue;
+		}
 
 	get_file_name:
 		*file_name = (char *)malloc(len + 1);
@@ -46,7 +46,6 @@ bool argv_parser(char **argv, int argc, char **error_message, char **file_name, 
 		continue;
 
 	}
-
 
 	return true;
 }

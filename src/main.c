@@ -1,4 +1,5 @@
 
+#include <estehvm/vm/esteh.h>
 #include <estehvm/cli/argv_parser.h>
 
 /**
@@ -40,6 +41,11 @@ int main(int argc, char **argv, char **envp)
 		free(error_msg);
 		exit(1);
 	}
+
+	uint8_t exit_code = esteh_vm_run_file(file_name, app_argc, app_argv);
+
+
+	exit(exit_code);
 
 	return 0;
 }
