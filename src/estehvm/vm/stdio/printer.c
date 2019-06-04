@@ -28,7 +28,7 @@ size_t esteh_err_printf(char *format, ...) {
 	char *buff;
 
 	va_start(args, format);
-	needed_size = vsnprintf(NULL, 0, format, args);
+	needed_size = vsnprintf(NULL, 0, format, args) + 1;
 	buff = (char *)malloc(needed_size + 1);
 	va_end(args);
 
