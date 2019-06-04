@@ -1,5 +1,4 @@
 
-
 if ($c[i] == '/') {
 
 	// Singeline comment.

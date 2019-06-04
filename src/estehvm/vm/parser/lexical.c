@@ -6,12 +6,14 @@
 #include <estehvm/vm/token.h>
 #include <estehvm/vm/debugger/token.h>
 
-uint32_t esteh_vm_lexical_analyze(char *fmap, size_t fsize, esteh_token ***tokens) {
+uint32_t esteh_vm_lexical_analyze(char *fmap, size_t fsize, esteh_token ***tokens, bool *is_error, char **error_message) {
 	uint32_t token_count = 0;
 	uint32_t lineno = 1;
 	#define $t (*tokens)
 	#define $c (fmap)
 	#define $ti token_count
+
+	#define PARSE_ERROR(...) \
 
 	#define SET_TOKEN(TOKEN_TYPE, TOKEN_BODY, TOKEN_BODY_SIZE, TOKEN_LINENO) \
 		$t[$ti] = (esteh_token *)malloc(sizeof(esteh_token)); \
@@ -36,15 +38,17 @@ uint32_t esteh_vm_lexical_analyze(char *fmap, size_t fsize, esteh_token ***token
 
 		#include "components/comment_parser.cxx"
 		#include "components/string_parser.cxx"
+		#include "components/number_parser.cxx"
 
 	}
 
 	TOKEN_DUMPER($t, token_count);
 
-	#undef $c
 	#undef $t
+	#undef $c
 	#undef $ti
 	#undef SET_TOKEN
+	#undef SET_TOKEN_NP
 
 	printf("Token count: %d\n", token_count);
 

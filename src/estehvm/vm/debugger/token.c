@@ -13,6 +13,7 @@ const char *get_token_type_name(esteh_token_type n) {
 		_RC(t_number, "t_number")
 		_RC(t_symbol, "t_symbol")
 		_RC(t_constant, "t_constant")
+		_RC(t_operator, "t_operator")
 	}
 
 	#undef _RC
