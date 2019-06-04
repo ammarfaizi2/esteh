@@ -1,6 +1,7 @@
 
 #include <estehvm/vm/esteh.h>
 #include <estehvm/cli/argv_parser.h>
+#include <estehvm/vm/stdio.h>
 
 /**
  * @author Ammar Faizi <ammarfaizi2@gmail.com> https://www.facebook.com/ammarfaizi2
@@ -10,6 +11,29 @@
 
 int main(int argc, char **argv, char **envp)
 {
+	char q[] = "qwertyuiopasdfghjklzxcvbnm|qwertyuiopasdfghjklzxcvbnm|qwertyuiopasdfghjklzxcvbnm\n";
+	esteh_stdout_buffer_init();
+	esteh_stdout_buffer_add(q, sizeof(q) - 1);
+	esteh_stdout_buffer_add(q, sizeof(q) - 1);
+	esteh_stdout_buffer_add(q, sizeof(q) - 1);
+	esteh_stdout_buffer_add(q, sizeof(q) - 1);
+	esteh_stdout_buffer_add(q, sizeof(q) - 1);
+	esteh_stdout_buffer_add(q, sizeof(q) - 1);
+	esteh_stdout_buffer_add(q, sizeof(q) - 1);
+	esteh_stdout_buffer_add(q, sizeof(q) - 1);
+	esteh_stdout_buffer_add(q, sizeof(q) - 1);
+	esteh_stdout_buffer_add(q, sizeof(q) - 1);
+	esteh_stdout_buffer_add(q, sizeof(q) - 1);
+	esteh_stdout_buffer_add(q, sizeof(q) - 1);
+	esteh_stdout_buffer_add(q, sizeof(q) - 1);
+	esteh_stdout_buffer_add(q, sizeof(q) - 1);
+	esteh_stdout_buffer_add(
+		"=====================================================\n",
+		sizeof("=====================================================\n") - 1
+	);
+	esteh_stdout_buffer_flush();
+
+	exit(0);
 
 	if (argc == 1) {
 		show_help(argv[0]);
