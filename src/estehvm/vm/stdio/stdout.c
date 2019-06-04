@@ -5,7 +5,7 @@
 
 char *esteh_stdout_buffer;
 size_t stdout_stored_buffer_size = 0;
-size_t esteh_stdout_buffer_size = 10;
+size_t esteh_stdout_buffer_size = 8092;
 
 void esteh_stdout_buffer_init() {
 	esteh_stdout_buffer = (char *)malloc(esteh_stdout_buffer_size + 1);
