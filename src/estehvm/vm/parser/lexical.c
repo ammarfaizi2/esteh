@@ -1,6 +1,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include <estehvm/vm/esteh.h>
 #include <estehvm/vm/token.h>
 #include <estehvm/vm/debugger/token.h>
@@ -19,6 +20,14 @@ uint32_t esteh_vm_lexical_analyze(char *fmap, size_t fsize, esteh_token ***token
 		$t[$ti]->body = (char *)malloc(TOKEN_BODY_SIZE); \
 		$t[$ti]->lineno = TOKEN_LINENO; \
 		memcpy($t[$ti]->body, TOKEN_BODY, TOKEN_BODY_SIZE); \
+		$ti++;
+
+	#define SET_TOKEN_NP(TOKEN_TYPE, TOKEN_BODY, TOKEN_BODY_SIZE, TOKEN_LINENO) \
+		$t[$ti] = (esteh_token *)malloc(sizeof(esteh_token)); \
+		$t[$ti]->type = TOKEN_TYPE; \
+		$t[$ti]->body_size = TOKEN_BODY_SIZE; \
+		$t[$ti]->body = TOKEN_BODY; \
+		$t[$ti]->lineno = TOKEN_LINENO; \
 		$ti++;
 
 	$t = (esteh_token **)malloc(ESTEH_TOKEN_SGGT * (sizeof(esteh_token *)));
