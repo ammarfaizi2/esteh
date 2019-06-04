@@ -21,9 +21,6 @@ int main(int argc, char **argv, char **envp)
 	char **app_argv = NULL;
 
 	#define MAIN_CLEAN_UP \
-		if (file_name != NULL) { \
-			free(file_name); \
-		} \
 		if (app_argv != NULL) { \
 			for (int i = 0; i < app_argc; i++) { \
 				free(app_argv[i]); \
@@ -41,6 +38,8 @@ int main(int argc, char **argv, char **envp)
 	uint8_t exit_code = esteh_vm_run_file(file_name, app_argc, app_argv);
 	MAIN_CLEAN_UP
 	exit(exit_code);
+
+	#undef MAIN_CLEAN_UP
 
 	return 0;
 }
