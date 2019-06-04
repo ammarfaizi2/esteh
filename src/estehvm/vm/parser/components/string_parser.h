@@ -12,7 +12,7 @@ if ($c[i] == '"') {
 			lineno++;
 		} else if (is_escaped) {
 			is_escaped = false;
-			#include "escape_char.cxx"
+			#include "escape_char.h"
 		} else if ($c[i] == '\\') {
 			is_escaped = true;
 			goto _skip_set;
