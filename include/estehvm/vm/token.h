@@ -11,8 +11,7 @@ typedef enum {
 	t_string = 2,
 	t_number = 3,
 	t_symbol = 4,
-	t_constant = 5,
-	t_operator = 6
+	t_operator = 5
 } esteh_token_type;
 
 typedef struct _esteh_token {
@@ -23,7 +22,6 @@ typedef struct _esteh_token {
 } esteh_token;
 
 #define ESTEH_TOKEN_SGGT 1024
-
 uint32_t esteh_vm_lexical_analyze(char *fmap, size_t fsize, esteh_token ***tokens, bool *is_error, char **error_message);
 
 #endif
