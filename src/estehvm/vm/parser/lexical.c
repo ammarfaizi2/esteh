@@ -36,9 +36,9 @@ uint32_t esteh_vm_lexical_analyze(char *fmap, size_t fsize, esteh_token ***token
 
 	for (uint32_t i = 0; i < fsize; i++) {
 
-		#include "components/comment_parser.cxx"
-		#include "components/string_parser.cxx"
-		#include "components/number_parser.cxx"
+		#include "components/comment_parser.h"
+		#include "components/string_parser.h"
+		#include "components/number_parser.h"
 
 	}
 
