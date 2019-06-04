@@ -39,5 +39,7 @@ int main(int argc, char **argv, char **envp)
 	MAIN_CLEAN_UP
 	exit(exit_code);
 
+	#undef MAIN_CLEAN_UP
+
 	return 0;
 }
