@@ -7,7 +7,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <estehvm/vm/esteh.h>
-#include <estehvm/vm/token.h>
 
 uint8_t esteh_vm_run_file(char *file_name, int app_argc, char **app_argv) {
 	uint8_t exit_code = 0;
