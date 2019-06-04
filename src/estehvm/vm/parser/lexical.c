@@ -3,6 +3,7 @@
 #include <string.h>
 #include <estehvm/vm/esteh.h>
 #include <estehvm/vm/token.h>
+#include <estehvm/vm/debugger/token.h>
 
 uint32_t esteh_vm_lexical_analyze(char *fmap, size_t fsize, esteh_token ***tokens) {
 	uint32_t token_count = 0;
@@ -17,15 +18,19 @@ uint32_t esteh_vm_lexical_analyze(char *fmap, size_t fsize, esteh_token ***token
 		$t[$ti]->body_size = TOKEN_BODY_SIZE; \
 		$t[$ti]->body = (char *)malloc(TOKEN_BODY_SIZE); \
 		$t[$ti]->lineno = TOKEN_LINENO; \
-		memcpy($t[$ti]->body, TOKEN_BODY, TOKEN_BODY_SIZE);
+		memcpy($t[$ti]->body, TOKEN_BODY, TOKEN_BODY_SIZE); \
+		$ti++;
 
 	$t = (esteh_token **)malloc(ESTEH_TOKEN_SGGT * (sizeof(esteh_token *)));
 
 	for (uint32_t i = 0; i < fsize; i++) {
 
 		#include "components/comment_parser.cxx"
+		#include "components/string_parser.cxx"
 
 	}
+
+	TOKEN_DUMPER($t, token_count);
 
 	#undef $c
 	#undef $t

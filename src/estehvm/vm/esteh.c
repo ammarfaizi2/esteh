@@ -31,15 +31,11 @@ uint8_t esteh_vm_run_file(char *file_name, int app_argc, char **app_argv) {
 	}
 
 	fsize = st.st_size;
-	fmap = (char *)mmap(NULL, fsize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, fd, 0);
-	printf("fmap: %d\n", fsize);
-
-	// Init 10 MB buffer.
-	free(malloc(10 * 1024 * 1024));
+	fmap = (char *)mmap(NULL, fsize + 4, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
 
 	token_count = esteh_vm_lexical_analyze(fmap, fsize, &tokens);
 
-	munmap(fmap, fsize);
+	munmap(fmap, fsize + 4);
 	close(fd);
 
 

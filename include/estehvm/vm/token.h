@@ -3,7 +3,7 @@
 #define estehvm__vm__token_h
 
 #include <stdint.h>
-#include <estehvm/vm/token.h>
+#include <stdlib.h>
 
 typedef enum {
 	t_whitespace = 1,
