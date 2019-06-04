@@ -44,5 +44,19 @@ uint8_t esteh_vm_run_file(char *file_name, int app_argc, char **app_argv) {
 	munmap(fmap, fsize + 4);
 	close(fd);
 
+	esteh_token_clean_up(&tokens, token_count);
+
 	return exit_code;
+}
+
+void esteh_token_clean_up(esteh_token ***tokens, uint32_t token_count) {
+	for (uint32_t i = 0; i < token_count; ++i) {
+		if ((*tokens)[i] != NULL) {
+			if ((*tokens)[i]->body != NULL) {
+				free((*tokens)[i]->body);
+			}
+			free((*tokens)[i]);
+		}
+	}
+	free(*tokens);
 }

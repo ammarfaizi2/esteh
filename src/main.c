@@ -8,7 +8,6 @@
  * @license MIT
  * @version 0.0.1
  */
-
 int main(int argc, char **argv, char **envp)
 {
 	if (argc == 1) {
@@ -21,30 +20,26 @@ int main(int argc, char **argv, char **envp)
 	int app_argc = 0;
 	char **app_argv = NULL;
 
+	#define MAIN_CLEAN_UP \
+		if (file_name != NULL) { \
+			free(file_name); \
+		} \
+		if (app_argv != NULL) { \
+			for (int i = 0; i < app_argc; i++) { \
+				free(app_argv[i]); \
+			} \
+			free(app_argv); \
+		}
+
 	if (!argv_parser(argv, argc, &error_msg, &file_name, &app_argc, &app_argv)) {
-
-		if (file_name != NULL) {
-			free(file_name);
-			file_name = NULL;
-		}
-
-		if (app_argv != NULL) {
-			for (int i = 0; i < app_argc; ++i) {
-				free(app_argv[i]);
-				app_argv[i] = NULL;
-			}
-			free(app_argv);
-			app_argv = NULL;
-		}
-
+		MAIN_CLEAN_UP
 		printf("%s\n", error_msg);
 		free(error_msg);
 		exit(1);
 	}
 
 	uint8_t exit_code = esteh_vm_run_file(file_name, app_argc, app_argv);
-
-
+	MAIN_CLEAN_UP
 	exit(exit_code);
 
 	return 0;
