@@ -1,5 +1,4 @@
 
-
 #ifndef estehvm__vm__bytecode_h
 #define estehvm__vm__bytecode_h
 

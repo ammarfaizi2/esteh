@@ -19,6 +19,7 @@ typedef struct _esteh_token {
 	size_t body_size;
 	uint32_t lineno;
 	esteh_token_type type;
+	struct esteh_bytecode *bytecode;
 } esteh_token;
 
 #define ESTEH_TOKEN_SGGT 1024

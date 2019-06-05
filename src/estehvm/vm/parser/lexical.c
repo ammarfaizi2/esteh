@@ -9,6 +9,7 @@
 uint32_t esteh_vm_lexical_analyze(char *fmap, size_t fsize, esteh_token ***tokens, char *file_name, bool *is_error, char **error_message) {
 	uint32_t token_count = 0;
 	uint32_t lineno = 1;
+	uint32_t i = 0;
 	#define $t (*tokens)
 	#define $c (fmap)
 	#define $ti token_count
@@ -38,14 +39,13 @@ uint32_t esteh_vm_lexical_analyze(char *fmap, size_t fsize, esteh_token ***token
 
 	$t = (esteh_token **)malloc(ESTEH_TOKEN_SGGT * (sizeof(esteh_token *)));
 
-	for (uint32_t i = 0; i < fsize; i++) {
-
-		#include "components/whitespace_parser.h"
-		#include "components/comment_parser.h"
-		#include "components/string_parser.h"
-		#include "components/number_parser.h"
-
+	while (i < fsize) {
+		#include "components/001_comment_parser.h"
+		#include "components/002_whitespace_parser.h"
+		#include "components/003_string_parser.h"
+		i++;
 	}
+	
 
 	TOKEN_DUMPER($t, token_count);
 

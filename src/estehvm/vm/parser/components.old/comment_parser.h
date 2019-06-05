@@ -9,11 +9,11 @@ if ($c[i] == '/') {
 
 		i += 2;
 		while ((i < fsize) && ($c[i] != '\n')) i++;
-		lineno++;
 
 		#ifndef COMMENT_IS_NOT_A_TOKEN
 			SET_TOKEN(t_whitespace, &($c[start_comment]), i - start_comment + 1, lineno - 1);
 			$t[$ti - 1]->body[i - start_comment] = '\0';
+			goto _start_loop;
 		#endif
 	} else 
 
@@ -25,17 +25,20 @@ if ($c[i] == '/') {
 		#endif
 
 		i += 2;
-		while (
-			(i < fsize) && (!(($c[i] == '*') && ($c[i+1] == '/')))
-		) {
-			if ($c[i] == '\n') lineno++;
+		while (i < fsize) {
+			if (($c[i] == '*') && ($c[i+1] == '/')) {
+				i+=2;
+				break;
+			} else if ($c[i] == '\n') {
+				lineno++;
+			}
 			i++;
 		}
-		i += 2;
 
 		#ifndef COMMENT_IS_NOT_A_TOKEN
 			SET_TOKEN(t_whitespace, &($c[start_comment]), i - start_comment + 1, start_lineno);
 			$t[$ti - 1]->body[i - start_comment] = '\0';
+			goto _start_loop;
 		#endif
 	}
 }
