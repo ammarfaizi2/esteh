@@ -4,11 +4,11 @@
 #define estehvm__vm__bytecode_h
 
 typedef struct _keyword {
-
+	void *handler;
 } bt_keyword;
 
 typedef struct _constant {
-
+	
 } bt_constant;
 
 typedef struct _variable {

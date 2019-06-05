@@ -11,6 +11,7 @@
 		for (int __i = 0; __i < TOKEN_COUNT; ++__i) { \
 			esteh_printf("===============================\n"); \
 			esteh_printf("Token Type : %s\n", get_token_type_name(TOKENS[__i]->type)); \
+			esteh_printf("Line       : %d\n", TOKENS[__i]->lineno); \
 			esteh_printf("Body Size  : %ld\n", TOKENS[__i]->body_size); \
 			esteh_printf("Token Body : %s\n", TOKENS[__i]->body); \
 			esteh_printf("===============================\n"); \
