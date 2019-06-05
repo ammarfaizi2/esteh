@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <estehvm/vm/esteh.h>
 #include <estehvm/vm/stdio.h>
+#include <estehvm/vm/bytecode.h>
 
 void esteh_vm_init_io() {
 	esteh_stdout_buffer_init();
@@ -29,6 +30,7 @@ uint8_t esteh_vm_run_file(char *file_name, int app_argc, char **app_argv) {
 	char *lexical_error_message = NULL;
 	uint32_t token_count = 0;
 	esteh_token **tokens;
+	esteh_bytecode **bytecodes;
 
 	esteh_vm_init_io();
 	fd = open(file_name, O_RDONLY);
@@ -48,8 +50,8 @@ uint8_t esteh_vm_run_file(char *file_name, int app_argc, char **app_argv) {
 	fsize = st.st_size;
 	fmap = (char *)mmap(NULL, fsize + 4, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
 
-	token_count = esteh_vm_lexical_analyze(fmap, fsize, &tokens, &lexical_error, &lexical_error_message);
-	esteh_vm_tokenizer(&tokens, token_count);
+	token_count = esteh_vm_lexical_analyze(fmap, fsize, &tokens, file_name, &lexical_error, &lexical_error_message);
+	esteh_vm_tokenizer(&tokens, token_count, &bytecodes);
 
 	if (lexical_error) {
 		esteh_err_printf("Parse Error: %s\n", lexical_error_message);

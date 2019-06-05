@@ -6,14 +6,12 @@
 #include <estehvm/vm/token.h>
 #include <estehvm/vm/debugger/token.h>
 
-uint32_t esteh_vm_lexical_analyze(char *fmap, size_t fsize, esteh_token ***tokens, bool *is_error, char **error_message) {
+uint32_t esteh_vm_lexical_analyze(char *fmap, size_t fsize, esteh_token ***tokens, char *file_name, bool *is_error, char **error_message) {
 	uint32_t token_count = 0;
 	uint32_t lineno = 1;
 	#define $t (*tokens)
 	#define $c (fmap)
 	#define $ti token_count
-
-	#define PARSE_ERROR(...) \
 
 	#define SET_TOKEN(TOKEN_TYPE, TOKEN_BODY, TOKEN_BODY_SIZE, TOKEN_LINENO) \
 		$t[$ti] = (esteh_token *)malloc(sizeof(esteh_token)); \
@@ -31,6 +29,12 @@ uint32_t esteh_vm_lexical_analyze(char *fmap, size_t fsize, esteh_token ***token
 		$t[$ti]->body = TOKEN_BODY; \
 		$t[$ti]->lineno = TOKEN_LINENO; \
 		$ti++;
+
+	#define PARSE_ERROR(...) \
+		*is_error = true; \
+		*error_message = (char *)malloc(snprintf(NULL, 0, __VA_ARGS__) + 1); \
+		sprintf(*error_message, __VA_ARGS__); \
+		return 0;
 
 	$t = (esteh_token **)malloc(ESTEH_TOKEN_SGGT * (sizeof(esteh_token *)));
 
@@ -50,6 +54,7 @@ uint32_t esteh_vm_lexical_analyze(char *fmap, size_t fsize, esteh_token ***token
 	#undef $ti
 	#undef SET_TOKEN
 	#undef SET_TOKEN_NP
+	#undef PARSE_ERROR
 
 	printf("Token count: %d\n", token_count);
 

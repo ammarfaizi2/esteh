@@ -22,6 +22,6 @@ typedef struct _esteh_token {
 } esteh_token;
 
 #define ESTEH_TOKEN_SGGT 1024
-uint32_t esteh_vm_lexical_analyze(char *fmap, size_t fsize, esteh_token ***tokens, bool *is_error, char **error_message);
+uint32_t esteh_vm_lexical_analyze(char *fmap, size_t fsize, esteh_token ***tokens, char *file_name, bool *is_error, char **error_message);
 
 #endif
