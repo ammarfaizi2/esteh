@@ -6,6 +6,7 @@
 *.swp
 *.swo
 *.lock
+/.deps
 /esteh
 /.phpintel/
 __teacache__

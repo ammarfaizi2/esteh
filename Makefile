@@ -1,53 +1,56 @@
 
-COMPILER = gcc
-LINKER = gcc
-RELEASE_MODE = 0
+COMPILER = g++
+LINKER = g++
+BIN_FILE = esteh
+LIBS = -lpthread -lcurl
+SOURCE_DIR = src/
+ROOT_DEPDIR = .deps
 
-ROOT_DIR = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-BIN_NAME = esteh
-TARGET_BIN = ${ROOT_DIR}/${BIN_NAME}
-INC = -I${ROOT_DIR}/include
-SRC = ${ROOT_DIR}/src
-
-_COMPILER_FLAGS = -Wall -c ${INC}
-LINKER_FLAGS = -Wall
-
-ifeq (${RELEASE_MODE},0)
-	COMPILER_FLAGS = ${_COMPILER_FLAGS} -ggdb -g3 -O0 -D ESTEH_DEBUG
+ifeq (${RELEASE_MODE},1)
+	LINKER_FLAGS  = -Wall -fno-stack-protector -s -O3 -o
+	COMPILER_FLAGS = -Wall -fno-stack-protector -Iinclude/ -s -O3 -c -o
 else
-	COMPILER_FLAGS = ${_COMPILER_FLAGS} -O3 -s
+	LINKER_FLAGS  = -Wall -fno-stack-protector -ggdb3 -Og -o
+	COMPILER_FLAGS = -Wall -fno-stack-protector -Iinclude/ -ggdb3 -Og -c -o
 endif
 
-RM = rm -vf
-CP = cp -vf
-LN = ln -vsf
-MKDIR = mkdir -vp
-
-STRIP = strip -s ${TARGET_BIN}
-
-SOURCES = $(shell find ${SRC} -name '*.c')
+SOURCES = $(shell find ${SOURCE_DIR} -name '*.c')
 OBJECTS = $(SOURCES:%.c=%.c.o)
+SOURCES_DIR = $(shell find ${SOURCE_DIR} -type d)
 
-all: ${OBJECTS} ${TARGET_BIN}
+DEPDIR = ${SOURCES_DIR:%=${ROOT_DEPDIR}/%}
+DEPFLAGS = -MT $@ -MMD -MP -MF ${ROOT_DEPDIR}/$*.d
+DEPFILES = ${SOURCES:%=${ROOT_DEPDIR}/%.d}
+BUILD_FRAGS = $(shell php generator.php build)
+DEPFRAGS = $(shell php generator.php deps)
 
-${TARGET_BIN}: ${OBJECTS}
-	${LINKER} ${LINKER_FLAGS} -o ${TARGET_BIN} ${OBJECTS}
 
-${OBJECTS}:
-	${COMPILER} ${COMPILER_FLAGS} ${@:%.o=%} -o $@
+all: ${BIN_FILE}
 
-install:
-	${CP} ${TARGET_BIN} /usr/bin/${BIN_NAME}
-	chmod +x /usr/bin/${BIN_NAME}
+${ROOT_DEPDIR}:
+	mkdir -p $@
 
-uninstall:
-	${RM} /usr/bin/${BIN_NAME}
+${DEPFRAGS}: ${BUILD_FRAGS}
+	php generator.php
 
-test:
-	php ${ROOT_DIR}/run_test.php
+${DEPDIR}: | ${ROOT_DEPDIR}
+	mkdir -p $@
 
-strip:
-	${STRIP}
+${OBJECTS}: | ${DEPDIR} ${DEPFRAGS}
+	${COMPILER} ${DEPFLAGS} ${COMPILER_FLAGS} $@ ${@:%.o=%}
+
+${BIN_FILE}: ${OBJECTS}
+	${LINKER} ${LINKER_FLAGS} ${BIN_FILE} ${OBJECTS} ${LIBS}
+
+-include ${DEPFILES}
+
+release:
+	make clean
+	make RELEASE_MODE=1 ${RELEASE_FLAGS}
+	strip -s ${BIN_FILE}
 
 clean:
-	${RM} ${OBJECTS} ${TARGET_BIN}
+	rm -rf ${DEPFILES}
+	rm -rf ${OBJECTS}
+	rm -rf ${BIN_FILE}
+	php generator.php clean
